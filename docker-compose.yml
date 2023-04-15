@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+
+  postgres:
+    image: postgres:14.7
+    env_file:
+      - ./app/.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U app -d movies_database" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    ports:
+      - "5439:5432"
