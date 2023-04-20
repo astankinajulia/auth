@@ -1,10 +1,17 @@
 import uuid
 
-from flask_security import RoleMixin, UserMixin
+from flask_security import RoleMixin
+from flask_login import UserMixin
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import db
+from db.db import db
+
+
+def get_user(email):
+    user = User.query.filter_by(email=email).first()
+    return user
 
 
 class User(db.Model, UserMixin):
@@ -18,10 +25,14 @@ class User(db.Model, UserMixin):
 
     def __init__(self, email, password):
         self.email = email
-        self.password = generate_password_hash(password)
+        self.password = self.generate_password_hash(password)
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    @staticmethod
+    def generate_password_hash(password):
+        return generate_password_hash(password)
 
     def verify_password(self, password):
         return check_password_hash(self.password, password)
@@ -39,3 +50,18 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
+
+# class UserSession(db.Model):
+#     __tablename__ = 'session'
+#     id = db.Column(db.Integer(), primary_key=True)
+#     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
+#     user_agent = db.Column(db.String(255))
+#     auth_date = db.Column(db.DateTime(timezone=True), server_default=func.utcnow())
+#     device = db.Column(db.String(255))
+
+
+# class UserDevices(db.Model):
+#     id = db.Column(db.Integer(), primary_key=True)
+#     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
+#     session_id = db.Column('session_id', db.Integer, db.ForeignKey('session.id'))
+#     device_name = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
