@@ -1,16 +1,15 @@
 import logging
 
-from flask import Blueprint, request, abort, Response, jsonify
-from flask_jwt_extended import (
-    create_access_token, set_access_cookies, unset_jwt_cookies, create_refresh_token,
-    jwt_required, get_jwt_identity, verify_jwt_in_request
-)
-from flask_login import login_required, login_user
-
 from db.errors import NotFoundInDBError
 from db.redis_service import Redis
 from db.user_service import user_service_db
 from errors import BadRequestError, NotFoundError, UnauthorizedError
+from flask import Blueprint, Response, jsonify, request
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt_identity, jwt_required,
+                                set_access_cookies, unset_jwt_cookies,
+                                verify_jwt_in_request)
+from flask_login import login_required, login_user
 from users.utils import validate_email
 
 log = logging.getLogger(__name__)
@@ -33,18 +32,26 @@ def unauthorized_api_usage(e):
     return jsonify(e.to_dict()), e.status_code
 
 
-@user_bp.route('/register', methods=['POST'])
-def register():
-    params = request.get_json()
-    email = params.get('email')
-    password = params.get('password')
-
-    if not email:
-        raise BadRequestError(message='Request without email')
-    if not password:
-        raise BadRequestError(message='Request without password')
+def validate_email_param(email: str):
     if not validate_email(email):
         raise BadRequestError(message='Not valid email')
+
+
+def get_param(params: dict, param_name: str):
+    param = params.get(param_name)
+    if not param:
+        raise BadRequestError(message=f'Request without {param_name}')
+
+
+@user_bp.route('/register', methods=['POST'])
+def register():
+    log.info('Register api')
+
+    params = request.get_json()
+    email = get_param(params, 'email')
+    password = get_param(params, 'password')
+
+    validate_email_param(password)
 
     user = user_service_db.get_user_by_email(email)
     if user:
@@ -56,14 +63,11 @@ def register():
 
 @user_bp.route('/login', methods=['POST'])
 def login():
-    log.info('Login')
+    log.info('Login api')
+
     params = request.get_json()
-    email = params.get('email')
-    password = params.get('password')
-    if not email:
-        raise BadRequestError(message='Request without email')
-    if not password:
-        raise BadRequestError(message='Request without password')
+    email = get_param(params, 'email')
+    password = get_param(params, 'password')
 
     try:
         user = user_service_db.get_user_by_email(email=email, is_optional=False)
@@ -88,7 +92,7 @@ def login():
 @user_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
-    log.info('Refresh')
+    log.info('Refresh api')
 
     identity = get_jwt_identity()
     log.info(f'{identity=}')
@@ -114,8 +118,9 @@ def refresh():
 
 @user_bp.route('/logout', methods=['POST'])
 @jwt_required(refresh=True)
-# @jwt_required()
 def logout():
+    log.info('Logout api')
+
     identity = get_jwt_identity()
 
     Redis().delete(key=identity)
@@ -133,14 +138,9 @@ def update():
         raise BadRequestError(message='Request without email')
 
     params = request.get_json()
-    email = params.get('email')
-    password = params.get('password')
-    if not email:
-        raise BadRequestError(message='Request without email')
-    if not password:
-        raise BadRequestError(message='Request without password')
-    if not validate_email(email):
-        raise BadRequestError(message='Not valid email')
+    email = get_param(params, 'email')
+    password = get_param(params, 'password')
+    validate_email_param(email)
 
     user_id = get_jwt_identity()
     try:
