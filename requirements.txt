@@ -5,6 +5,7 @@ Flask-Security==3.0.0
 Flask-SQLAlchemy==3.0.3
 gevent==22.10.2
 psycopg2-binary==2.9.6
+pydantic==1.10.7
 pytz==2023.3
 SQLAlchemy==2.0.9
 redis==4.5.4

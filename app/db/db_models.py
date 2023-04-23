@@ -3,7 +3,7 @@ import uuid
 from db.db import db
 from flask_login import UserMixin
 from flask_security import RoleMixin
-# from sqlalchemy import func
+from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -50,13 +50,13 @@ class Role(db.Model, RoleMixin):
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
-# class UserSession(db.Model):
-#     __tablename__ = 'session'
-#     id = db.Column(db.Integer(), primary_key=True)
-#     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
-#     user_agent = db.Column(db.String(255))
-#     auth_date = db.Column(db.DateTime(timezone=True), server_default=func.utcnow())
-#     device = db.Column(db.String(255))
+
+class UserSession(db.Model):
+    __tablename__ = 'session'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_agent = db.Column(db.String(255))
+    auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
 
 # class UserDevices(db.Model):

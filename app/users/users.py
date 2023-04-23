@@ -3,13 +3,16 @@ import logging
 from db.errors import NotFoundInDBError
 from db.redis_service import Redis
 from db.user_service import user_service_db
+from db.user_session_service import user_session_service_db
 from errors import BadRequestError, NotFoundError, UnauthorizedError
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required,
                                 set_access_cookies, unset_jwt_cookies,
                                 verify_jwt_in_request)
-from flask_login import login_required, login_user
+from flask_login import login_user
+
+from users.schemas import UserSession
 from users.utils import validate_email
 
 log = logging.getLogger(__name__)
@@ -79,6 +82,8 @@ def login():
 
     login_user(user)
 
+    user_session_service_db.create_user_session(user_id=user.id, user_agent=str(request.user_agent))
+
     access_token = create_access_token(identity=user.id, fresh=True)
     refresh_token = create_refresh_token(identity=user.id)
 
@@ -128,6 +133,8 @@ def logout():
     response = jsonify({'msg': 'logout successful'})
     unset_jwt_cookies(response)
 
+    user_session_service_db.delete_user_session(user_id=identity, user_agent=str(request.user_agent))
+
     return response
 
 
@@ -156,6 +163,14 @@ def update():
 
 
 @user_bp.route('/get_sessions', methods=['GET'])
-@login_required
+@jwt_required()
 def get_sessions():
-    return 'get_sessions'
+    user_id = get_jwt_identity()
+    user_sessions = user_session_service_db.get_all_user_sessions(user_id=user_id)
+    return [
+        UserSession(
+            user_agent=user_session.user_agent,
+            auth_date=user_session.auth_date,
+        ).dict()
+        for user_session in user_sessions
+    ]
