@@ -1,12 +1,11 @@
 import uuid
 
-from flask_security import RoleMixin
+from db.db import db
 from flask_login import UserMixin
-from sqlalchemy import func
+from flask_security import RoleMixin
+# from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from db.db import db
 
 
 def get_user(email):

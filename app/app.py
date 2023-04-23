@@ -1,12 +1,11 @@
 import logging
 
+from config.settings import Config
+from db.db_models import get_user
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
-
-from db.db_models import get_user
 from users.users import user_bp
-from config.settings import Config
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ def create_app():
         return get_user(id)
 
     app.register_blueprint(user_bp, url_prefix='')
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     return app
 

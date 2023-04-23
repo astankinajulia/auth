@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 import redis
-
 from config.settings import Config
 
 log = logging.getLogger(__name__)
