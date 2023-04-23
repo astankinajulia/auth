@@ -34,13 +34,14 @@ def unauthorized_api_usage(e):
 
 def validate_email_param(email: str):
     if not validate_email(email):
-        raise BadRequestError(message='Not valid email')
+        raise BadRequestError(message=f'Not valid email {email}')
 
 
 def get_param(params: dict, param_name: str):
     param = params.get(param_name)
     if not param:
         raise BadRequestError(message=f'Request without {param_name}')
+    return param
 
 
 @user_bp.route('/register', methods=['POST'])
@@ -51,7 +52,7 @@ def register():
     email = get_param(params, 'email')
     password = get_param(params, 'password')
 
-    validate_email_param(password)
+    validate_email_param(email)
 
     user = user_service_db.get_user_by_email(email)
     if user:
