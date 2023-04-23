@@ -22,3 +22,7 @@ class NotFoundError(BaseAPIError):
 
 class BadRequestError(BaseAPIError):
     status_code = 400
+
+
+class UnauthorizedError(BaseAPIError):
+    status_code = 401

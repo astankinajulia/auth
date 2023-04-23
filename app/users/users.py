@@ -10,7 +10,7 @@ from flask_login import login_required, login_user
 from db.errors import NotFoundInDBError
 from db.redis_service import Redis
 from db.user_service import user_service_db
-from errors import NotFoundError, BadRequestError
+from errors import BadRequestError, NotFoundError, UnauthorizedError
 from users.utils import validate_email
 
 log = logging.getLogger(__name__)
@@ -24,7 +24,12 @@ def invalid_api_usage(e):
 
 
 @user_bp.errorhandler(BadRequestError)
-def invalid_api_usage(e):
+def bad_request_api_usage(e):
+    return jsonify(e.to_dict()), e.status_code
+
+
+@user_bp.errorhandler(UnauthorizedError)
+def unauthorized_api_usage(e):
     return jsonify(e.to_dict()), e.status_code
 
 
@@ -36,15 +41,14 @@ def register():
 
     if not email:
         raise BadRequestError(message='Request without email')
-        # abort(400, description='Request without email')
     if not password:
-        abort(400, description='Request without password')
+        raise BadRequestError(message='Request without password')
     if not validate_email(email):
-        abort(400, description='Not valid email')
+        raise BadRequestError(message='Not valid email')
 
     user = user_service_db.get_user_by_email(email)
     if user:
-        abort(400, description='User has already registered')
+        raise BadRequestError(message='User has already registered')
 
     user_service_db.create_user(email=email, password=password)
     return Response('', status=201, mimetype='application/json')
@@ -57,9 +61,9 @@ def login():
     email = params.get('email')
     password = params.get('password')
     if not email:
-        abort(400, description='Request without email')
+        raise BadRequestError(message='Request without email')
     if not password:
-        abort(400, description='Request without password')
+        raise BadRequestError(message='Request without password')
 
     try:
         user = user_service_db.get_user_by_email(email=email, is_optional=False)
@@ -92,10 +96,10 @@ def refresh():
     redis = Redis()
     refresh_token_in_db = redis.get(key=identity)
     if not refresh_token_in_db:
-        abort(401, description='Not found refresh token in db')
+        raise UnauthorizedError(message='Not found refresh token in db')
     k = request.cookies['refresh_token_cookie']
     if refresh_token_in_db != k:
-        abort(401, description='Not correct refresh token in db')
+        raise UnauthorizedError(message='Not correct refresh token in db')
 
     access_token = create_access_token(identity=identity, fresh=False)
     refresh_token = create_refresh_token(identity=identity)
@@ -126,17 +130,17 @@ def logout():
 def update():
     jwt_data = verify_jwt_in_request()
     if not jwt_data:
-        abort(400, description='Request without email')
+        raise BadRequestError(message='Request without email')
 
     params = request.get_json()
     email = params.get('email')
     password = params.get('password')
     if not email:
-        abort(400, description='Request without email')
+        raise BadRequestError(message='Request without email')
     if not password:
-        abort(400, description='Request without password')
+        raise BadRequestError(message='Request without password')
     if not validate_email(email):
-        abort(400, description='Not valid email')
+        raise BadRequestError(message='Not valid email')
 
     user_id = get_jwt_identity()
     try:
@@ -146,7 +150,8 @@ def update():
 
     user_service_db.update_user(user_id, email, password)
 
-    return 'change'
+    response = jsonify({'msg': 'User updated'})
+    return response
 
 
 @user_bp.route('/get_sessions', methods=['GET'])
