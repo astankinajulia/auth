@@ -16,3 +16,13 @@ class NotFoundInDBError(BaseDBError):
         self.attrs = {
             'entity': entity,
         }
+
+
+class IntegrityDBError(BaseDBError):
+    _message = 'Integrity error with params {params}'
+
+    def __init__(self, params, *args):
+        super().__init__(*args)
+        self.attrs = {
+            'params': params,
+        }
