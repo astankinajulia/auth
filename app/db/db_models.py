@@ -3,7 +3,7 @@ import uuid
 from db.db import db
 from flask_login import UserMixin
 from flask_security import RoleMixin
-from sqlalchemy import func
+from sqlalchemy import UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -42,6 +42,7 @@ class RolesUsers(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
     role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+    __table_args__ = (UniqueConstraint('user_id', 'role_id', name='_user_role_uc'), )
 
     def __init__(self, user_id, role_id):
         self.user_id = user_id

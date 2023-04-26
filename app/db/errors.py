@@ -13,6 +13,7 @@ class NotFoundInDBError(BaseDBError):
 
     def __init__(self, entity, *args):
         super().__init__(*args)
+        self.entity = entity
         self.attrs = {
             'entity': entity,
         }
@@ -20,6 +21,16 @@ class NotFoundInDBError(BaseDBError):
 
 class IntegrityDBError(BaseDBError):
     _message = 'Integrity error with params {params}'
+
+    def __init__(self, params, *args):
+        super().__init__(*args)
+        self.attrs = {
+            'params': params,
+        }
+
+
+class AlreadyExistsDBError(BaseDBError):
+    _message = 'Already exists {params}'
 
     def __init__(self, params, *args):
         super().__init__(*args)

@@ -1,6 +1,6 @@
 import logging
 
-from db.errors import IntegrityDBError, NotFoundInDBError
+from db.errors import NotFoundInDBError
 from db.roles_service import BaseRoleServiceDB, role_service_db
 from flask import Blueprint, Flask
 from flask_restful import Api, Resource, abort, fields, marshal_with, reqparse
@@ -10,8 +10,6 @@ log = logging.getLogger(__name__)
 app = Flask(__name__)
 roles_bp = Blueprint('roles_bp', __name__)
 api = Api(roles_bp)
-
-user_bp = Blueprint('roles_bp', __name__)
 
 parser = reqparse.RequestParser()
 
@@ -36,12 +34,14 @@ class Roles(BaseRolesApi):
     def patch(self, role_id):
         """Update the role"""
         args = parser.parse_args()
-        role = self.role_service.update(
-            role_id=role_id,
-            name=args['name'],
-            description=args['description']
-        )
-        return role
+        try:
+            return self.role_service.update(
+                role_id=role_id,
+                name=args['name'],
+                description=args['description']
+            )
+        except NotFoundInDBError:
+            abort(404, message="Role with id {} doesn't exist".format(role_id))
 
     def delete(self, role_id):
         """Delete the role"""
@@ -66,14 +66,11 @@ class RolesList(BaseRolesApi):
     def post(self):
         """Create a role"""
         args = parser.parse_args()
-        try:
-            role = self.role_service.create(
-                name=args['name'],
-                description=args['description']
-            )
-            return role
-        except IntegrityDBError:
-            abort(400, message="Role '{}' already exist".format(args['name']))
+        role = self.role_service.create(
+            name=args['name'],
+            description=args['description']
+        )
+        return role
 
 
 api.add_resource(Roles, '/roles/<int:role_id>')

@@ -3,8 +3,7 @@ from typing import Optional
 
 from db.db import db
 from db.db_models import Role
-from db.errors import IntegrityDBError, NotFoundInDBError
-from sqlalchemy.exc import IntegrityError
+from db.errors import NotFoundInDBError
 
 
 class BaseRoleServiceDB:
@@ -31,16 +30,12 @@ class RoleServiceDB(BaseRoleServiceDB):
         return roles
 
     def create(self, name: str, description: str):
+        role = Role.query.filter_by(name=name).first()
+        if role:
+            return role
         role = Role(name=name, description=description)
-        try:
-            db.session.add(role)
-            db.session.commit()
-        except IntegrityError:
-            params = {
-                'name': name,
-                'description': description,
-            }
-            raise IntegrityDBError(params)
+        db.session.add(role)
+        db.session.commit()
         return role
 
     def delete(self, role_id: str):
@@ -55,6 +50,8 @@ class RoleServiceDB(BaseRoleServiceDB):
             return
 
         role = Role.query.filter_by(id=role_id).first()
+        if not role:
+            raise NotFoundInDBError(entity='role')
         if name:
             role.name = name
         if description:
