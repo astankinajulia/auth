@@ -1,11 +1,10 @@
 import abc
 from typing import Optional
 
-from sqlalchemy.exc import IntegrityError
-
 from db.db import db
 from db.db_models import Role
 from db.errors import IntegrityDBError
+from sqlalchemy.exc import IntegrityError
 
 
 class BaseRoleServiceDB:
@@ -42,6 +41,7 @@ class RoleServiceDB(BaseRoleServiceDB):
                 'description': description,
             }
             raise IntegrityDBError(params)
+        return role
 
     def delete(self, role_id: str):
         role = Role.query.filter_by(id=role_id).first()
@@ -58,6 +58,7 @@ class RoleServiceDB(BaseRoleServiceDB):
         if description:
             role.description = description
         db.session.commit()
+        return role
 
 
 role_service_db = RoleServiceDB()

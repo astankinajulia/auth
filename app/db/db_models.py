@@ -43,12 +43,20 @@ class RolesUsers(db.Model):
     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
     role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
 
+    def __init__(self, user_id, role_id):
+        self.user_id = user_id
+        self.role_id = role_id
+
 
 class Role(db.Model, RoleMixin):
     __tablename__ = 'role'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
+
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
 
 
 class UserSession(db.Model):
