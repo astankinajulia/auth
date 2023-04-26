@@ -3,7 +3,7 @@ from typing import Optional
 
 from db.db import db
 from db.db_models import Role
-from db.errors import IntegrityDBError
+from db.errors import IntegrityDBError, NotFoundInDBError
 from sqlalchemy.exc import IntegrityError
 
 
@@ -45,6 +45,8 @@ class RoleServiceDB(BaseRoleServiceDB):
 
     def delete(self, role_id: str):
         role = Role.query.filter_by(id=role_id).first()
+        if not role:
+            raise NotFoundInDBError(entity='role')
         db.session.delete(role)
         db.session.commit()
 

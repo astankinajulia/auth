@@ -1,9 +1,9 @@
 import logging
 
+from db.errors import IntegrityDBError, NotFoundInDBError
 from db.roles_service import BaseRoleServiceDB, role_service_db
 from flask import Blueprint, Flask
-from flask_restful import Api, Resource, fields, marshal_with, reqparse
-from users.schemas import Role
+from flask_restful import Api, Resource, abort, fields, marshal_with, reqparse
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class BaseRolesApi(Resource):
 class Roles(BaseRolesApi):
 
     @marshal_with(role_fields)
-    def put(self, role_id):
+    def patch(self, role_id):
         """Update the role"""
         args = parser.parse_args()
         role = self.role_service.update(
@@ -41,41 +41,40 @@ class Roles(BaseRolesApi):
             name=args['name'],
             description=args['description']
         )
-        return Role(**role)
+        return role
 
-    @marshal_with(role_fields)
     def delete(self, role_id):
         """Delete the role"""
-        role = self.role_service.delete(
-            role_id=role_id
-        )
-        return Role(**role)
+        try:
+            self.role_service.delete(
+                role_id=role_id
+            )
+        except NotFoundInDBError:
+            abort(404, message="Role with id {} doesn't exist".format(role_id))
+        return '', 204
 
 
 class RolesList(BaseRolesApi):
 
+    @marshal_with(role_fields)
     def get(self):
         """Get all roles"""
         roles = self.role_service.get_all()
-        return [
-            Role(
-                id=role.id,
-                name=role.name,
-                description=role.description,
-            ).dict()
-            for role in roles
-        ]
+        return roles
 
     @marshal_with(role_fields)
     def post(self):
         """Create a role"""
         args = parser.parse_args()
-        role = self.role_service.create(
-            name=args['name'],
-            description=args['description']
-        )
-        return Role(**role)
+        try:
+            role = self.role_service.create(
+                name=args['name'],
+                description=args['description']
+            )
+            return role
+        except IntegrityDBError:
+            abort(400, message="Role '{}' already exist".format(args['name']))
 
 
-api.add_resource(Roles, '/roles/<int:id>')
+api.add_resource(Roles, '/roles/<int:role_id>')
 api.add_resource(RolesList, '/roles')
