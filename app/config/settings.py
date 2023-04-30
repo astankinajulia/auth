@@ -3,6 +3,10 @@ import os
 from datetime import timedelta
 
 from config import logger
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config(object):
@@ -14,8 +18,8 @@ class Config(object):
     BASE_DIR = APP_DIR
 
     DB_TYPE = os.environ.get('DB_TYPE', 'postgresql')
-    DB_HOST = os.environ.get('DB_HOST', 'localhost')
-    DB_PORT = os.environ.get('DB_TYPE', '5440')
+    DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+    DB_PORT = os.environ.get('POSTGRES_PORT')
     DB_NAME = os.environ.get('POSTGRES_DB', 'users_db')
     DB_USER = os.environ.get('POSTGRES_USER', 'app')
     DB_PASS = os.environ.get('POSTGRES_PASSWORD', '12345')

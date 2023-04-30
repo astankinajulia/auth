@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:14.7
     env_file:
-      - ./app/.env
+      - app/config/.env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U app -d movies_database" ]
       interval: 10s
@@ -24,6 +24,19 @@ services:
       - "6379"
     volumes:
       - cache:/data
+
+  app:
+    restart: unless-stopped
+    image: app_image
+    build:
+      context: .
+    env_file:
+      - app/config/.env
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "5000:5000"
 
 volumes:
   cache:
