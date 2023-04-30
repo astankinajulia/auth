@@ -11,7 +11,6 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 set_access_cookies, unset_jwt_cookies,
                                 verify_jwt_in_request)
 from flask_login import login_user
-
 from users.schemas import UserSession
 from users.utils import validate_email
 
