@@ -36,5 +36,4 @@ jobs:
       release-name: v${{ env.release_version }}
       mention-authors: true
       mention-new-contributors: true
-      include-compare: true
       semver: true
