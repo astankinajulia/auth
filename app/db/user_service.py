@@ -1,8 +1,11 @@
 import abc
+import logging
 
 from db.db import db
 from db.db_models import User
 from db.errors import NotFoundInDBError
+
+log = logging.getLogger(__name__)
 
 
 class BaseUserServiceDB:
@@ -42,6 +45,7 @@ class UserServiceDB(BaseUserServiceDB):
         db.session.commit()
 
     def update_user(self, user_id, email, password) -> None:
+        log.info('Update user {user_id} in db'.format(user_id=user_id))
         user = self.get_user_by_id(user_id=user_id)
         user.email = email
         user.password = User.generate_password_hash(password)

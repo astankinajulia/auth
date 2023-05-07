@@ -6,7 +6,7 @@ services:
     env_file:
       - app/config/.env
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U app -d movies_database" ]
+      test: [ "CMD-SHELL", "pg_isready -U app -d users_db" ]
       interval: 10s
       timeout: 5s
       retries: 5

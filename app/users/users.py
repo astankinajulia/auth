@@ -2,14 +2,15 @@ import logging
 
 from db.errors import NotFoundInDBError
 from db.redis_service import Redis
+from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
 from errors import BadRequestError, NotFoundError, UnauthorizedError
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required,
-                                set_access_cookies, unset_jwt_cookies,
-                                verify_jwt_in_request)
+                                set_access_cookies, set_refresh_cookies,
+                                unset_jwt_cookies, verify_jwt_in_request)
 from flask_login import login_user
 from users.schemas import UserSession
 from users.utils import validate_email
@@ -77,19 +78,23 @@ def login():
     except NotFoundInDBError:
         raise NotFoundError(message='User not found')
     if not user.verify_password(password):
-        return jsonify({'msg': 'Bad username or password'}), 401
+        return jsonify({'message': 'Bad username or password'}), 401
 
     login_user(user)
 
     user_session_service_db.create_user_session(user_id=user.id, user_agent=str(request.user_agent))
 
-    access_token = create_access_token(identity=user.id, fresh=True)
+    user_roles = user_role_service_db.get_user_role(user_id=user.id)
+    additional_claims = {"user_roles": user_roles}
+
+    access_token = create_access_token(identity=user.id, fresh=True, additional_claims=additional_claims)
     refresh_token = create_refresh_token(identity=user.id)
 
     Redis().set(key=str(user.id), value=refresh_token)
 
     response = jsonify(access_token=access_token, refresh_token=refresh_token)
-    set_access_cookies(response, access_token)
+    set_access_cookies(response=response, encoded_access_token=access_token)
+    set_refresh_cookies(response=response, encoded_refresh_token=refresh_token)
 
     return response
 
@@ -106,8 +111,8 @@ def refresh():
     refresh_token_in_db = redis.get(key=identity)
     if not refresh_token_in_db:
         raise UnauthorizedError(message='Not found refresh token in db')
-    k = request.cookies['refresh_token_cookie']
-    if refresh_token_in_db != k:
+    refresh_token_cookie = request.cookies['refresh_token_cookie']
+    if refresh_token_in_db != refresh_token_cookie:
         raise UnauthorizedError(message='Not correct refresh token in db')
 
     access_token = create_access_token(identity=identity, fresh=False)
@@ -116,7 +121,8 @@ def refresh():
     Redis().set(key=identity, value=refresh_token)
 
     response = jsonify('')
-    set_access_cookies(response, access_token)
+    set_access_cookies(response=response, encoded_access_token=access_token)
+    set_refresh_cookies(response=response, encoded_refresh_token=refresh_token)
 
     return response
 
@@ -129,7 +135,7 @@ def logout():
     identity = get_jwt_identity()
 
     Redis().delete(key=identity)
-    response = jsonify({'msg': 'logout successful'})
+    response = jsonify({'message': 'logout successful'})
     unset_jwt_cookies(response)
 
     user_session_service_db.delete_user_session(user_id=identity, user_agent=str(request.user_agent))
@@ -140,6 +146,8 @@ def logout():
 @user_bp.route('/update', methods=['POST'])
 @jwt_required()
 def update():
+    log.info('Update user api')
+
     jwt_data = verify_jwt_in_request()
     if not jwt_data:
         raise BadRequestError(message='Request without email')
@@ -153,11 +161,19 @@ def update():
     try:
         user_service_db.get_user_by_id(user_id=user_id, is_optional=False)
     except NotFoundInDBError:
+        log.info(f'User {user_id} not found')
         raise NotFoundError(message='User not found')
 
     user_service_db.update_user(user_id, email, password)
 
-    response = jsonify({'msg': 'User updated'})
+    response = jsonify({'message': 'User updated'})
+
+    access_token_cookie = request.cookies.get('access_token_cookie')
+    refresh_token_cookie = request.cookies.get('refresh_token_cookie')
+
+    set_access_cookies(response=response, encoded_access_token=access_token_cookie)
+    set_refresh_cookies(response=response, encoded_refresh_token=refresh_token_cookie)
+
     return response
 
 
