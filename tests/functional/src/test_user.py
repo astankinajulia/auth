@@ -7,6 +7,7 @@ pytestmark = pytest.mark.asyncio
 
 
 class UserAuthorisationApi:
+    """Common data for User Authorisation Api tests."""
     register_url = '/register'
     login_url = '/login'
     refresh_url = '/refresh'
@@ -15,6 +16,7 @@ class UserAuthorisationApi:
     get_sessions_url = '/get_sessions'
 
     async def register_and_login(self, make_post_request, email, password):
+        """Register and login method for tests."""
         json = {
             'email': email,
             'password': password,
@@ -28,6 +30,7 @@ class UserAuthorisationApi:
 
 
 class TestRegisterUser(UserAuthorisationApi):
+    """Tests for endpoint "/register"."""
 
     async def test_register(
             self,
@@ -90,6 +93,7 @@ class TestRegisterUser(UserAuthorisationApi):
 
 
 class TestLoginUser(UserAuthorisationApi):
+    """Tests for endpoint "/login"."""
 
     async def test_login_not_found(
             self,
@@ -150,6 +154,7 @@ class TestLoginUser(UserAuthorisationApi):
 
 
 class TestRefreshUser(UserAuthorisationApi):
+    """Tests for endpoint "/refresh"."""
 
     async def test_refresh(
             self,
@@ -199,6 +204,7 @@ class TestRefreshUser(UserAuthorisationApi):
 
 
 class TestLogoutUser(UserAuthorisationApi):
+    """Tests for endpoint "/logout"."""
 
     async def test_logout(
             self,
@@ -232,6 +238,7 @@ class TestLogoutUser(UserAuthorisationApi):
 
 
 class TestUpdateUser(UserAuthorisationApi):
+    """Tests for endpoint "/update"."""
 
     async def test_update(
             self,
@@ -270,6 +277,7 @@ class TestUpdateUser(UserAuthorisationApi):
 
 
 class TestGetSessions(UserAuthorisationApi):
+    """Tests for endpoint "/get_sessions"."""
 
     async def test_get_sessions(
             self,
