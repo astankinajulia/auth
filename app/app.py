@@ -5,9 +5,9 @@ from db.db_models import get_user
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
-from users.roles import roles_bp
-from users.user_roles import user_roles_bp
-from users.users import user_bp
+from routes.roles import roles_bp
+from routes.user_roles import user_roles_bp
+from routes.users import user_bp
 
 log = logging.getLogger(__name__)
 
@@ -35,9 +35,9 @@ def create_app():
     def load_user(id):
         return get_user(id)
 
-    app.register_blueprint(user_bp, url_prefix='')
-    app.register_blueprint(roles_bp, url_prefix='')
-    app.register_blueprint(user_roles_bp, url_prefix='')
+    app.register_blueprint(user_bp, url_prefix='/auth')
+    app.register_blueprint(roles_bp, url_prefix='/roles')
+    app.register_blueprint(user_roles_bp, url_prefix='/users')
 
     JWTManager(app)
 

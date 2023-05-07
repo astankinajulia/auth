@@ -8,12 +8,13 @@ pytestmark = pytest.mark.asyncio
 
 class UserAuthorisationApi:
     """Common data for User Authorisation Api tests."""
-    register_url = '/register'
-    login_url = '/login'
-    refresh_url = '/refresh'
-    logout_url = '/logout'
-    update_url = '/update'
-    get_sessions_url = '/get_sessions'
+    prefix = '/auth'
+    register_url = prefix + '/register'
+    login_url = prefix + '/login'
+    refresh_url = prefix + '/refresh'
+    logout_url = prefix + '/logout'
+    update_url = prefix + '/update'
+    get_sessions_url = prefix + '/get_sessions'
 
     async def register_and_login(self, make_post_request, email, password):
         """Register and login method for tests."""
@@ -144,7 +145,7 @@ class TestLoginUser(UserAuthorisationApi):
         response = await make_post_request(url_ending=self.register_url, json=json)
         assert response.status == HTTPStatus.CREATED
 
-        json['password'] = '12345'
+        json['password'] = '12345ads'
 
         response = await make_post_request(url_ending=self.login_url, json=json)
 

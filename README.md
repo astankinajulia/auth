@@ -2,6 +2,16 @@
 
 Service for authorisation and authentication
 
+### AUTH API
+API for register, login, logout, update user, refresh token, get user sessions.
+http://127.0.0.1:5000/auth/doc
+### ROLES API
+API for create, delete, update role and get all roles.  
+http://127.0.0.1:5000/roles/doc
+### USER ROLES API
+API for get, put, delete user roles by user_id and role_id.
+http://127.0.0.1:5000/users/doc
+
 ### Run server
 Run
 ```

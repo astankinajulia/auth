@@ -1,7 +1,6 @@
 import aiohttp
 import pytest
 from faker import Faker
-
 from functional.settings import TestSettings
 
 fake = Faker()

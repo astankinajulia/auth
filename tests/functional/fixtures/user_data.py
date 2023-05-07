@@ -1,5 +1,4 @@
 import pytest
-
 from functional.conftest import fake
 
 

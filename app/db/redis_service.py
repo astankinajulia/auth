@@ -6,7 +6,7 @@ from config.settings import Config
 
 log = logging.getLogger(__name__)
 
-redis_db = redis.Redis(host='0.0.0.0', port=6379, db=0)
+redis_db = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=0)
 
 
 class Redis:

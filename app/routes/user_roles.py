@@ -3,13 +3,21 @@ import logging
 from db.errors import AlreadyExistsDBError, NotFoundInDBError
 from db.user_roles_service import BaseUserRoleServiceDB, user_role_service_db
 from flask import Blueprint, Flask
-from flask_restful import Api, Resource, abort, fields, marshal_with
+from flask_restful import abort, fields, marshal_with
+from flask_restx import Api, Resource
 
 log = logging.getLogger(__name__)
 
 app = Flask(__name__)
 user_roles_bp = Blueprint('user_roles_bp', __name__)
-api = Api(user_roles_bp)
+api = Api(
+    user_roles_bp,
+    doc='/doc',
+    title='USER ROLES API',
+    description='API for get, put, delete user roles by user_id and role_id.',
+    default='User roles',
+    default_label='User roles API',
+)
 
 
 role_fields = {
@@ -20,13 +28,14 @@ role_fields = {
 
 
 class BaseUserRoleApi(Resource):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.user_role_service: BaseUserRoleServiceDB = user_role_service_db
 
 
 class UserRole(BaseUserRoleApi):
     def put(self, user_id, role_id):
-        """Add the role to the user"""
+        """Add the role to the user."""
         try:
             self.user_role_service.put_user_role(
                 user_id=user_id,
@@ -39,7 +48,7 @@ class UserRole(BaseUserRoleApi):
         return '', 201
 
     def delete(self, user_id, role_id):
-        """Delete the role from the user"""
+        """Delete the role from the user."""
         try:
             self.user_role_service.delete_user_role(
                 user_id=user_id,
@@ -54,9 +63,9 @@ class UserRoleList(BaseUserRoleApi):
 
     @marshal_with(role_fields)
     def get(self, user_id):
-        """Get all user roles"""
+        """Get all user roles."""
         return self.user_role_service.get_user_role(user_id=user_id)
 
 
-api.add_resource(UserRole, '/users/<string:user_id>/roles/<int:role_id>')
-api.add_resource(UserRoleList, '/users/<string:user_id>/roles/')
+api.add_resource(UserRole, '/<string:user_id>/roles/<int:role_id>')
+api.add_resource(UserRoleList, '/<string:user_id>/roles/')

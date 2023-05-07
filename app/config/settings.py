@@ -24,6 +24,9 @@ class Config(object):
     DB_USER = os.environ.get('POSTGRES_USER', 'app')
     DB_PASS = os.environ.get('POSTGRES_PASSWORD', '12345')
 
+    REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+    REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+
     SQLALCHEMY_DATABASE_URI = f'{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     JWT_COOKIE_SECURE = os.environ.get('JWT_COOKIE_SECURE', False) == 'True'
