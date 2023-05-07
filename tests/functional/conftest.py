@@ -2,7 +2,7 @@ import aiohttp
 import pytest
 from faker import Faker
 
-from tests.functional.settings import TestSettings
+from functional.settings import TestSettings
 
 fake = Faker()
 
@@ -13,7 +13,7 @@ def get_settings() -> TestSettings:
 
 test_settings = get_settings()
 
-pytest_plugins = "tests.functional.fixtures"
+pytest_plugins = "functional.fixtures"
 
 
 @pytest.fixture
@@ -47,18 +47,3 @@ def make_post_request():
             )
 
     return inner
-
-
-@pytest.fixture
-def email():
-    return fake.email()
-
-
-@pytest.fixture
-def email2():
-    return fake.email()
-
-
-@pytest.fixture
-def password():
-    return fake.password()

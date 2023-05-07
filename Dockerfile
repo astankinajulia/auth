@@ -15,10 +15,11 @@ FROM base as dev
 RUN mkdir "opt/app"
 
 COPY app /opt/app
+COPY tests /opt/app/tests
 
 WORKDIR /opt/app
 
-#EXPOSE 8000
+#EXPOSE 5000
 
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 
