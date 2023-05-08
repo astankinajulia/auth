@@ -133,7 +133,6 @@ class Refresh(Resource):
         log.info('Refresh api')
 
         identity = get_jwt_identity()
-        log.info(f'{identity=}')
 
         redis = Redis()
         refresh_token_in_db = redis.get(key=identity)
@@ -194,7 +193,7 @@ class Update(Resource):
         try:
             user_service_db.get_user_by_id(user_id=user_id, is_optional=False)
         except NotFoundInDBError:
-            log.info(f'User {user_id} not found')
+            log.info('User %s not found', user_id)
             raise NotFoundError(message='User not found')
 
         user_service_db.update_user(user_id, email, password)
