@@ -19,4 +19,5 @@ COPY tests /opt/app/tests
 
 WORKDIR /opt/app
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+EXPOSE 5000
+CMD ["gunicorn", "wsgi_app:app", "-w", "4", "-b 0.0.0.0:5000"]
