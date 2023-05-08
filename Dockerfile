@@ -19,10 +19,4 @@ COPY tests /opt/app/tests
 
 WORKDIR /opt/app
 
-#EXPOSE 5000
-
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
-
-#CMD ["gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b 0.0.0.0:8000"]
-
-
