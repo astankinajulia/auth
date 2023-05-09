@@ -20,4 +20,6 @@ COPY tests /opt/app/tests
 WORKDIR /opt/app
 
 EXPOSE 5000
-CMD ["gunicorn", "wsgi_app:app", "-w", "4", "-b 0.0.0.0:5000"]
+
+RUN ["chmod", "+x", "deploy/run.sh"]
+ENTRYPOINT ["deploy/run.sh"]

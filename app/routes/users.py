@@ -5,7 +5,7 @@ from db.redis_service import Redis
 from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
-from errors import BadRequestError, NotFoundError, UnauthorizedError
+from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required,
