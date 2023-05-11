@@ -1,7 +1,10 @@
 import logging
 
+from flask_restx.reqparse import RequestParser
+
+from db.base_cache_service import AbstractCacheService
 from db.errors import NotFoundInDBError
-from db.redis_service import Redis
+from db.redis_service import RedisDB
 from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
@@ -13,9 +16,13 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 unset_jwt_cookies, verify_jwt_in_request)
 from flask_login import login_user
 from flask_restx import Api, Resource, fields
+
+from routes.schemas import PaginatedUserSessions
 from routes.utils import validate_email
 
 log = logging.getLogger(__name__)
+
+cache_service: AbstractCacheService = RedisDB()
 
 user_bp = Blueprint('api', __name__)
 api = Api(
@@ -31,11 +38,34 @@ parser = api.parser()
 parser.add_argument('email', type=str, required=True, location='json')
 parser.add_argument('password', type=str, required=True, location='json')
 
+
+pagination_parser = RequestParser()
+pagination_parser.add_argument(
+    'page', type=int, required=False, default=1, help='Page number',
+)
+pagination_parser.add_argument(
+    'pageSize', type=int, required=False, default=10, help='Page size',
+)
+
 user_session = api.model(
     'UserSession',
     {
         'user_agent': fields.String(required=True, description='user_agent'),
         'auth_date': fields.String(required=True, description='auth_date'),
+        'logout_date': fields.String(required=True, description='logout_date'),
+    }
+)
+
+paginated_user_session = api.model(
+    'PaginatedUserSessions',
+    {
+        'page': fields.Integer(required=True, description='page'),
+        'previous_page': fields.Integer(required=True, description='previous page'),
+        'next_page': fields.Integer(required=True, description='next page'),
+        'first_page': fields.Integer(required=True, description='first page', default=1),
+        'last_page': fields.Integer(required=True, description='last page'),
+        'total': fields.Integer(required=True, description='total pages'),
+        'items': fields.List(fields.Nested(user_session), required=True),
     }
 )
 
@@ -116,7 +146,7 @@ class Login(Resource):
         access_token = create_access_token(identity=user.id, fresh=True, additional_claims=additional_claims)
         refresh_token = create_refresh_token(identity=user.id)
 
-        Redis().set(key=str(user.id), value=refresh_token)
+        cache_service.set_to_cache(key=str(user.id), value=refresh_token)
 
         response = jsonify(access_token=access_token, refresh_token=refresh_token)
         set_access_cookies(response=response, encoded_access_token=access_token)
@@ -134,8 +164,7 @@ class Refresh(Resource):
 
         identity = get_jwt_identity()
 
-        redis = Redis()
-        refresh_token_in_db = redis.get(key=identity)
+        refresh_token_in_db = cache_service.get_from_cache(key=identity)
         if not refresh_token_in_db:
             raise UnauthorizedError(message='Not found refresh token in db')
         refresh_token_cookie = request.cookies['refresh_token_cookie']
@@ -145,7 +174,7 @@ class Refresh(Resource):
         access_token = create_access_token(identity=identity, fresh=False)
         refresh_token = create_refresh_token(identity=identity)
 
-        Redis().set(key=identity, value=refresh_token)
+        cache_service.set_to_cache(key=identity, value=refresh_token)
 
         response = jsonify('')
         set_access_cookies(response=response, encoded_access_token=access_token)
@@ -163,7 +192,7 @@ class Logout(Resource):
 
         identity = get_jwt_identity()
 
-        Redis().delete(key=identity)
+        cache_service.delete_from_cache(key=identity)
         response = jsonify({'message': 'logout successful'})
         unset_jwt_cookies(response)
 
@@ -209,18 +238,23 @@ class Update(Resource):
         return response
 
 
-@api.route('/get_sessions')
+@api.route('/get_user_login_history')
 class GetSessions(Resource):
-    @api.marshal_list_with(user_session)
+    @api.marshal_list_with(paginated_user_session)
     @jwt_required()
+    @api.expect(pagination_parser)
     def get(self):
         """Get user sessions."""
         user_id = get_jwt_identity()
-        user_sessions = user_session_service_db.get_all_user_sessions(user_id=user_id)
-        return [
-            {
-                "user_agent": user_session.user_agent,
-                "auth_date": str(user_session.auth_date.date()),
-            }
-            for user_session in user_sessions
-        ]
+
+        p_args = pagination_parser.parse_args()
+        page = p_args.get('page')
+        limit = p_args.get('pageSize')
+
+        user_sessions: PaginatedUserSessions = user_session_service_db.get_all_user_sessions(
+            user_id=user_id,
+            page=page,
+            per_page=limit,
+        )
+
+        return user_sessions.dict()

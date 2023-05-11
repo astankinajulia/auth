@@ -14,7 +14,7 @@ class UserAuthorisationApi:
     refresh_url = prefix + '/refresh'
     logout_url = prefix + '/logout'
     update_url = prefix + '/update'
-    get_sessions_url = prefix + '/get_sessions'
+    get_user_login_history_url = prefix + '/get_user_login_history'
 
     async def register_and_login(self, make_post_request, email, password):
         """Register and login method for tests."""
@@ -278,9 +278,9 @@ class TestUpdateUser(UserAuthorisationApi):
 
 
 class TestGetSessions(UserAuthorisationApi):
-    """Tests for endpoint "/get_sessions"."""
+    """Tests for endpoint "/get_user_login_history"."""
 
-    async def test_get_sessions(
+    async def test_get_user_login_history(
             self,
             make_post_request,
             make_get_request,
@@ -290,24 +290,30 @@ class TestGetSessions(UserAuthorisationApi):
         response = await self.register_and_login(make_post_request, email, password)
 
         response = await make_get_request(
-            url_ending=self.get_sessions_url,
+            url_ending=self.get_user_login_history_url,
             cookies=response.cookies,
         )
         assert response.status == HTTPStatus.OK
 
         body = await response.json()
-        assert body == [
-            {
-                'auth_date': ANY,
-                'user_agent': ANY,
-            }
-        ]
+        assert body == {
+            'first_page': 1,
+            'last_page': 1,
+            'next_page': None,
+            'page': 1,
+            'previous_page': None,
+            'total': 1,
+            'items': [{'auth_date': ANY,
+                       'logout_date': None,
+                       'user_agent': ANY}],
+        }
 
-    async def test_get_sessions_unauthorised(
+
+    async def test_get_user_login_history_unauthorised(
             self,
             make_get_request,
     ):
         response = await make_get_request(
-            url_ending=self.get_sessions_url,
+            url_ending=self.get_user_login_history_url,
         )
         assert response.status == HTTPStatus.UNAUTHORIZED

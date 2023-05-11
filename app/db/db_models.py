@@ -66,6 +66,7 @@ class UserSession(db.Model):
     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
     user_agent = db.Column(db.String(255))
     auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    logout_date = db.Column(db.DateTime(timezone=True))
 
 
 # class UserDevices(db.Model):
