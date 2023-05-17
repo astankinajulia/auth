@@ -1,5 +1,7 @@
 import logging
 
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+
 from config.settings import Config
 from db.db_models import get_user
 from flask import Flask, request
