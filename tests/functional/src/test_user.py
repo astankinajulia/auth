@@ -308,7 +308,6 @@ class TestGetSessions(UserAuthorisationApi):
                        'user_agent': ANY}],
         }
 
-
     async def test_get_user_login_history_unauthorised(
             self,
             make_get_request,

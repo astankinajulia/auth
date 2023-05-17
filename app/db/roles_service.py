@@ -4,6 +4,7 @@ from typing import Optional
 from db.db import db
 from db.db_models import Role
 from db.errors import NotFoundInDBError
+from tracer_configurator import trace_func
 
 
 class BaseRoleServiceDB:
@@ -25,10 +26,12 @@ class BaseRoleServiceDB:
 
 
 class RoleServiceDB(BaseRoleServiceDB):
+    @trace_func
     def get_all(self):
         roles = Role.query.all()
         return roles
 
+    @trace_func
     def create(self, name: str, description: str):
         role = Role.query.filter_by(name=name).first()
         if role:
@@ -38,6 +41,7 @@ class RoleServiceDB(BaseRoleServiceDB):
         db.session.commit()
         return role
 
+    @trace_func
     def delete(self, role_id: str):
         role = Role.query.filter_by(id=role_id).first()
         if not role:
@@ -45,6 +49,7 @@ class RoleServiceDB(BaseRoleServiceDB):
         db.session.delete(role)
         db.session.commit()
 
+    @trace_func
     def update(self, role_id: str, name: Optional[str] = None, description: Optional[str] = None):
         if not any([name, description]):
             return

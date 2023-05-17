@@ -8,7 +8,6 @@ from flask_restx import Api, Resource
 
 log = logging.getLogger(__name__)
 
-app = Flask(__name__)
 user_roles_bp = Blueprint('user_roles_bp', __name__)
 api = Api(
     user_roles_bp,
