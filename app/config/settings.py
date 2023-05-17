@@ -11,6 +11,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class Config(object):
     """ Base configuration. """
+    SERVICE_NAME = 'Auth'
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
@@ -26,6 +27,9 @@ class Config(object):
 
     REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
     REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+
+    JAEGER_HOST = os.environ.get('JAEGER_HOST', 'localhost')
+    JAEGER_PORT = int(os.environ.get('JAEGER_PORT', '6831'))
 
     SQLALCHEMY_DATABASE_URI = f'{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 

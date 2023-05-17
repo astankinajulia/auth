@@ -3,7 +3,9 @@ import datetime
 
 from db.db import db
 from db.db_models import UserSession
-from routes.schemas import PaginatedUserSessions, UserSession as UserSessionSchema
+from routes.schemas import PaginatedUserSessions
+from routes.schemas import UserSession as UserSessionSchema
+from tracer_configurator import trace_func
 
 
 class BaseUserSessionServiceDB:
@@ -25,16 +27,19 @@ class BaseUserSessionServiceDB:
 
 
 class UserSessionServiceDB(BaseUserSessionServiceDB):
+    @trace_func
     def create_user_session(self, user_id: str, user_agent: str) -> None:
         user_session = UserSession(user_id=user_id, user_agent=user_agent)
         db.session.add(user_session)
         db.session.commit()
 
+    @trace_func
     def delete_user_session_by_id(self, user_session_id: int):
         user_session = UserSession.query.filter_by(id=user_session_id).first()
         user_session.logout_date = datetime.datetime.now()
         db.session.commit()
 
+    @trace_func
     def get_all_user_sessions(self, user_id, page: int = 1, per_page: int = 10) -> PaginatedUserSessions:
         user_sessions = UserSession.query.filter_by(user_id=user_id).paginate(page=page, per_page=per_page, count=True)
         return PaginatedUserSessions(
@@ -54,6 +59,7 @@ class UserSessionServiceDB(BaseUserSessionServiceDB):
             ],
         )
 
+    @trace_func
     def delete_user_session(self, user_id: str, user_agent: str):
         user_sessions = UserSession.query.filter_by(user_id=user_id, user_agent=user_agent).all()
 

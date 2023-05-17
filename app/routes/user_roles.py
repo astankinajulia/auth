@@ -2,13 +2,12 @@ import logging
 
 from db.errors import AlreadyExistsDBError, NotFoundInDBError
 from db.user_roles_service import BaseUserRoleServiceDB, user_role_service_db
-from flask import Blueprint, Flask
+from flask import Blueprint
 from flask_restful import abort, fields, marshal_with
 from flask_restx import Api, Resource
 
 log = logging.getLogger(__name__)
 
-app = Flask(__name__)
 user_roles_bp = Blueprint('user_roles_bp', __name__)
 api = Api(
     user_roles_bp,
