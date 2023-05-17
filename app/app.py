@@ -2,19 +2,20 @@ import logging
 
 from config.settings import Config
 from db.db_models import get_user
-from flask import Flask
+from flask import Flask, request
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from routes.roles import roles_bp
 from routes.user_roles import user_roles_bp
 from routes.users import user_bp
+from tracer_configurator import configure_tracer
 
 log = logging.getLogger(__name__)
 
 
 def create_app():
     log.info('Create app...')
-
     app = Flask(__name__)
     app.config.from_object(Config)
 
@@ -40,6 +41,16 @@ def create_app():
     app.register_blueprint(user_roles_bp, url_prefix='/users')
 
     JWTManager(app)
+
+    # configure Jaeger tracer
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
+
+    @app.before_request
+    def before_request():
+        request_id = request.headers.get('X-Request-Id')
+        if not request_id:
+            raise RuntimeError('request id is required')
 
     return app
 

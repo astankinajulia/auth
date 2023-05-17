@@ -1,14 +1,11 @@
 import logging
 
-from flask_restx.reqparse import RequestParser
-
 from db.base_cache_service import AbstractCacheService
 from db.errors import NotFoundInDBError
 from db.redis_service import RedisDB
 from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
-from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required,
@@ -16,7 +13,8 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 unset_jwt_cookies, verify_jwt_in_request)
 from flask_login import login_user
 from flask_restx import Api, Resource, fields
-
+from flask_restx.reqparse import RequestParser
+from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from routes.schemas import PaginatedUserSessions
 from routes.utils import validate_email
 

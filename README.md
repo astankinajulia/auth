@@ -10,6 +10,7 @@ Service for authorisation and authentication
 * Roles API: Create, update, delete roles, get all roles
 * User Roles API: add, delete role for user, get all user roles 
 * Create superuser console command
+* Jaeger Tracing
 ## Run server
 ___
 #### Add environment variables
@@ -51,6 +52,10 @@ Run in tests/functional
 ```
 docker-compose -f docker-compose-test.yml up -d
 ```
+
+### Jaeger
+UI link
+http://127.0.0.1:16686/
 ## API docs
 ___
 ### AUTH API

@@ -2,13 +2,12 @@ import logging
 
 from db.errors import NotFoundInDBError
 from db.roles_service import BaseRoleServiceDB, role_service_db
-from flask import Blueprint, Flask
+from flask import Blueprint
 from flask_restful import abort, fields, marshal_with, reqparse
 from flask_restx import Api, Resource
 
 log = logging.getLogger(__name__)
 
-app = Flask(__name__)
 roles_bp = Blueprint('roles_bp', __name__)
 api = Api(
     roles_bp,
