@@ -1,12 +1,12 @@
 import logging
 
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-
 from config.settings import Config
 from db.db_models import get_user
 from flask import Flask, request
+from flask_http_middleware import MiddlewareManager
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
+from middlewares.rate_limiter import RateLimitMiddleware
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from routes.roles import roles_bp
 from routes.user_roles import user_roles_bp
@@ -54,9 +54,12 @@ def create_app():
         if not request_id:
             raise RuntimeError('request id is required')
 
+    app.wsgi_app = MiddlewareManager(app)
+    app.wsgi_app.add_middleware(RateLimitMiddleware)
+
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run()
+    app.run(debug=True)

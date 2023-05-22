@@ -2,7 +2,7 @@ import logging
 
 from db.base_cache_service import AbstractCacheService
 from db.errors import NotFoundInDBError
-from db.redis_service import RedisDB
+from db.redis_service import RedisCache
 from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
@@ -20,7 +20,7 @@ from routes.utils import validate_email
 
 log = logging.getLogger(__name__)
 
-cache_service: AbstractCacheService = RedisDB()
+cache_service: AbstractCacheService = RedisCache()
 
 user_bp = Blueprint('api', __name__)
 api = Api(

@@ -11,6 +11,8 @@ Service for authorisation and authentication
 * User Roles API: add, delete role for user, get all user roles 
 * Create superuser console command
 * Jaeger Tracing
+* Check X-Request-Id in headers
+* Rate limit Token Bucket algorithm
 ## Run server
 ___
 #### Add environment variables
