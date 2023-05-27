@@ -13,6 +13,7 @@ RUN pip3 install -r requirements.txt
 FROM base as dev
 
 RUN mkdir "opt/app"
+ENV PYTHONPATH /opt/app:/opt
 
 COPY app /opt/app
 COPY tests /opt/app/tests

@@ -39,10 +39,17 @@ class UserServiceDB(BaseUserServiceDB):
             raise NotFoundInDBError(entity='user')
         return user
 
-    def create_user(self, email: str, password: str) -> None:
+    def create_user(self, email: str, password: str) -> str:
         user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
+        return user.id
+
+    def get_or_create_user(self, email: str, password: str) -> str:
+        user = self.get_user_by_email(email=email)
+        if not user:
+            user = self.create_user(email=email, password=password)
+        return user.id
 
     def update_user(self, user_id, email, password) -> None:
         log.info('Update user %s in db', user_id)
