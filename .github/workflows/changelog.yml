@@ -37,3 +37,8 @@ jobs:
       mention-authors: true
       mention-new-contributors: true
       semver: true
+  - name: Save to Changelog.md
+    with:
+      github-token: ${{ github.token }}
+      run: echo ${{ steps.changelog.outputs.changelog }} > changelog.md
+
