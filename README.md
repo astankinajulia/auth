@@ -10,6 +10,7 @@ Service for authorisation and authentication
 * Roles API: Create, update, delete roles, get all roles
 * User Roles API: add, delete role for user, get all user roles 
 * Create superuser console command
+
 ## Run server
 ___
 #### Add environment variables
@@ -20,8 +21,9 @@ for other env params)
 docker-compose up --build -d
 ```
 #### Create superuser
+Creates superuser role if it doesn't exist. Creates 
 ```
-flask create_superuser 
+flask create_superuser user_email@test.com user_pass
 ```
 
 ## Local development
