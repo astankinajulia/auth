@@ -38,5 +38,5 @@ jobs:
       mention-new-contributors: true
       semver: true
   - name: Save to Changelog.md
-    run: echo ${{ steps.changelog.outputs.changelog }} > changelog.md
+    run: echo "${{ steps.changelog.outputs.changelog }}" > changelog.md
 
