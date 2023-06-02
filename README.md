@@ -23,8 +23,9 @@ for other env params)
 docker-compose up --build -d
 ```
 #### Create superuser
+Creates superuser role if it doesn't exist. Creates 
 ```
-flask create_superuser 
+flask create_superuser user_email@test.com user_pass
 ```
 
 ## Local development

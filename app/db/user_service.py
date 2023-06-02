@@ -43,10 +43,17 @@ class UserServiceDB(BaseUserServiceDB):
         return user
 
     @trace_func
-    def create_user(self, email: str, password: str) -> None:
+    def create_user(self, email: str, password: str) -> str:
         user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
+        return user.id
+
+    def get_or_create_user(self, email: str, password: str) -> str:
+        user = self.get_user_by_email(email=email)
+        if not user:
+            user = self.create_user(email=email, password=password)
+        return user.id
 
     @trace_func
     def update_user(self, user_id, email, password) -> None:

@@ -1,5 +1,8 @@
 import logging
 
+import click
+
+from comands import create_superuser_command
 from config.settings import Config
 from db.db_models import get_user
 from flask import Flask, request
@@ -8,6 +11,7 @@ from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
 from middlewares.rate_limiter import RateLimitMiddleware
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
+
 from routes.roles import roles_bp
 from routes.user_roles import user_roles_bp
 from routes.users import user_bp
@@ -25,7 +29,6 @@ def create_app():
 
     db.init_app(app)
     app.app_context().push()
-    # db.create_all()
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -43,6 +46,13 @@ def create_app():
     app.register_blueprint(user_roles_bp, url_prefix='/users')
 
     JWTManager(app)
+
+    @app.cli.command('create_superuser')
+    @click.argument('email')
+    @click.argument('password')
+    def create_superuser(email, password):
+        """Create superuser."""
+        create_superuser_command(email, password)
 
     # configure Jaeger tracer
     configure_tracer()
@@ -62,4 +72,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run()
