@@ -13,17 +13,20 @@ Service for authorisation and authentication
 * Jaeger Tracing
 * Check X-Request-Id in headers
 * Rate limit Token Bucket algorithm
+* Google authorizatio Authorization
 ## Run server
 ___
 #### Add environment variables
 In the folder `/app/config` create `.env` file (look `/app/config/.env.example` as example and `settings.py`
 for other env params)
+#### Add .crt and .key files
+In the folder `/nginx` add `localhost.crt` and `localhost.key` files for ssl connection.
 #### Run command
 ```
 docker-compose up --build -d
 ```
 #### Create superuser
-Creates superuser role if it doesn't exist. Creates 
+Creates superuser role if it doesn't exist
 ```
 flask create_superuser user_email@test.com user_pass
 ```
@@ -36,7 +39,7 @@ docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
 ```
 ### DB migrations
 Create new migration version locally:
-`alembic revision -m "create account table"`
+`alembic revision --autogenerate -m "create account table"`
 
 Run migration (you don't need to do this, this step added in DOCKERFILE Entrypoint)
 `docker-compose run app alembic upgrade head`

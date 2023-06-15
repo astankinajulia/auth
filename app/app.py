@@ -1,7 +1,6 @@
 import logging
 
 import click
-
 from comands import create_superuser_command
 from config.settings import Config
 from db.db_models import get_user
@@ -11,7 +10,7 @@ from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
 from middlewares.rate_limiter import RateLimitMiddleware
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-
+from routes.oauth2 import oauth2_bp
 from routes.roles import roles_bp
 from routes.user_roles import user_roles_bp
 from routes.users import user_bp
@@ -44,6 +43,7 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix='/auth')
     app.register_blueprint(roles_bp, url_prefix='/roles')
     app.register_blueprint(user_roles_bp, url_prefix='/users')
+    app.register_blueprint(oauth2_bp, url_prefix='/oauth2')
 
     JWTManager(app)
 
@@ -71,5 +71,11 @@ def create_app():
 
 
 if __name__ == '__main__':
+    # When running locally, disable OAuthlib's HTTPs verification.
+    # ACTION ITEM for developers:
+    #     When running in production *do not* leave this option enabled.
+    # import os
+    # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
     app = create_app()
     app.run()
