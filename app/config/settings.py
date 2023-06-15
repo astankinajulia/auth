@@ -13,10 +13,16 @@ class Config(object):
     """ Base configuration. """
     SERVICE_NAME = 'Auth'
 
+    OAUTHLIB_INSECURE_TRANSPORT = '1'
+
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
 
     BASE_DIR = APP_DIR
+
+    CLIENT_SECRETS_FILE = os.path.abspath(os.path.join(APP_DIR, 'client_secret.json'))
+
+    SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost')
 
     DB_TYPE = os.environ.get('DB_TYPE', 'postgresql')
     DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')

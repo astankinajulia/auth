@@ -3,9 +3,8 @@ import uuid
 import aiohttp
 import pytest
 from faker import Faker
-from multidict._multidict import CIMultiDictProxy, CIMultiDict
-
 from functional.settings import TestSettings
+from multidict._multidict import CIMultiDict, CIMultiDictProxy
 
 fake = Faker()
 
@@ -21,6 +20,7 @@ pytest_plugins = "functional.fixtures"
 
 def x_request_id() -> str:
     return str(uuid.uuid4())
+
 
 def add_x_request_id(headers):
     if not headers:

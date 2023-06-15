@@ -3,7 +3,6 @@ import logging
 from db.base_cache_service import AbstractCacheService
 from db.errors import NotFoundInDBError
 from db.redis_service import RedisCache
-from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
 from flask import Blueprint, Response, jsonify, request
@@ -14,6 +13,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
 from flask_login import login_user
 from flask_restx import Api, Resource, fields
 from flask_restx.reqparse import RequestParser
+from jwt_service import prepare_response_with_tokens
 from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from routes.schemas import PaginatedUserSessions
 from routes.utils import validate_email
@@ -138,17 +138,7 @@ class Login(Resource):
 
         user_session_service_db.create_user_session(user_id=user.id, user_agent=str(request.user_agent))
 
-        user_roles = user_role_service_db.get_user_role(user_id=user.id)
-        additional_claims = {"user_roles": user_roles}
-
-        access_token = create_access_token(identity=user.id, fresh=True, additional_claims=additional_claims)
-        refresh_token = create_refresh_token(identity=user.id)
-
-        cache_service.set_to_cache(key=str(user.id), value=refresh_token)
-
-        response = jsonify(access_token=access_token, refresh_token=refresh_token)
-        set_access_cookies(response=response, encoded_access_token=access_token)
-        set_refresh_cookies(response=response, encoded_refresh_token=refresh_token)
+        response = prepare_response_with_tokens(user_id=user.id)
 
         return response
 
