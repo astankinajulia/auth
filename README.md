@@ -76,6 +76,13 @@ http://127.0.0.1:5000/roles/doc
 API for get, put, delete user roles by user_id and role_id.  
 http://127.0.0.1:5000/users/doc
 
+### OAUTH2 API
+API for google authentication.  
+http://127.0.0.1:5000/oauth2/doc
+
+### Miro docs
+https://miro.com/app/board/uXjVMJU4K6w=/?share_link_id=718260316962
+
 ## Maintainer
 ___
 Julia Astankina

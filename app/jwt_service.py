@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import flask
+from db.base_cache_service import AbstractCacheService
+from db.redis_service import RedisCache
 from db.user_roles_service import user_role_service_db
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 set_access_cookies, set_refresh_cookies)
-from routes.users import cache_service
+
+cache_service: AbstractCacheService = RedisCache()
 
 
 def prepare_response_with_tokens(user_id: str, user_info: dict | None = None):

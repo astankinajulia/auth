@@ -6,7 +6,7 @@ import uuid
 from db.db import db
 from flask_login import UserMixin
 from flask_security import RoleMixin
-from sqlalchemy import UniqueConstraint, func, or_
+from sqlalchemy import PrimaryKeyConstraint, UniqueConstraint, func, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import ChoiceType
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -98,16 +98,33 @@ class Role(db.Model, RoleMixin):
         return f'<Role {self.name}>'
 
 
+def create_partition(target, connection, **kw) -> None:
+    """ creating partition by user """
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "session_y2023m05" PARTITION OF "session" 
+         FOR VALUES FROM ('2023-05-01') TO ('2023-06-01');"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "session_y2023m06" PARTITION OF "session" 
+         FOR VALUES FROM ('2023-06-01') TO ('2023-07-01');"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "session_y2023m07" PARTITION OF "session" 
+         FOR VALUES FROM ('2023-07-01') TO ('2023-08-01');"""
+    )
+
+
 class UserSession(db.Model):
-    __tablename__ = 'session'
-    id = db.Column(db.Integer(), primary_key=True)
+    __tablename__ = 'user_session'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'auth_date'),
+        {
+            'postgresql_partition_by': 'RANGE (auth_date)',
+            'listeners': [('after_create', create_partition)],
+        }
+    )
+    id = db.Column(db.Integer(), autoincrement=True)
     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
     user_agent = db.Column(db.String(255))
-    auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     logout_date = db.Column(db.DateTime(timezone=True))
-
-# class UserDevices(db.Model):
-#     id = db.Column(db.Integer(), primary_key=True)
-#     user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
-#     session_id = db.Column('session_id', db.Integer, db.ForeignKey('session.id'))
-#     device_name = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
