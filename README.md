@@ -10,18 +10,23 @@ Service for authorisation and authentication
 * Roles API: Create, update, delete roles, get all roles
 * User Roles API: add, delete role for user, get all user roles 
 * Create superuser console command
-
+* Jaeger Tracing
+* Check X-Request-Id in headers
+* Rate limit Token Bucket algorithm
+* Google authorizatio Authorization
 ## Run server
 ___
 #### Add environment variables
 In the folder `/app/config` create `.env` file (look `/app/config/.env.example` as example and `settings.py`
 for other env params)
+#### Add .crt and .key files
+In the folder `/nginx` add `localhost.crt` and `localhost.key` files for ssl connection.
 #### Run command
 ```
 docker-compose up --build -d
 ```
 #### Create superuser
-Creates superuser role if it doesn't exist. Creates 
+Creates superuser role if it doesn't exist
 ```
 flask create_superuser user_email@test.com user_pass
 ```
@@ -34,7 +39,7 @@ docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
 ```
 ### DB migrations
 Create new migration version locally:
-`alembic revision -m "create account table"`
+`alembic revision --autogenerate -m "create account table"`
 
 Run migration (you don't need to do this, this step added in DOCKERFILE Entrypoint)
 `docker-compose run app alembic upgrade head`
@@ -53,6 +58,10 @@ Run in tests/functional
 ```
 docker-compose -f docker-compose-test.yml up -d
 ```
+
+### Jaeger
+UI link
+http://127.0.0.1:16686/
 ## API docs
 ___
 ### AUTH API
@@ -66,6 +75,13 @@ http://127.0.0.1:5000/roles/doc
 ### USER ROLES API
 API for get, put, delete user roles by user_id and role_id.  
 http://127.0.0.1:5000/users/doc
+
+### OAUTH2 API
+API for google authentication.  
+http://127.0.0.1:5000/oauth2/doc
+
+### Miro docs
+https://miro.com/app/board/uXjVMJU4K6w=/?share_link_id=718260316962
 
 ## Maintainer
 ___

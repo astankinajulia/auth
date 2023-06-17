@@ -1,7 +1,6 @@
 import logging
 
 import click
-
 from db.errors import AlreadyExistsDBError
 from db.roles_service import role_service_db
 from db.user_roles_service import user_role_service_db
@@ -24,4 +23,3 @@ def create_superuser_command(email: str, password: str) -> None:
         click.echo('Superuser role already added to user')
     else:
         click.echo('Superuser role added to user')
-

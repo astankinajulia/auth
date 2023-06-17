@@ -22,5 +22,5 @@ WORKDIR /opt/app
 
 EXPOSE 5000
 
-RUN ["chmod", "+x", "deploy/run.sh"]
+RUN chmod +x deploy/run.sh
 ENTRYPOINT ["deploy/run.sh"]
