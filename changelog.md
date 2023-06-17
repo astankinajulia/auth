@@ -1,4 +1,8 @@
 ## New Features
+* add partition user_session (7ce3e2f53a20a76d678fad4ffb74c4c9ad4902ac by @astankinajulia)
+* add google oauth (d1b133303ff91e9f22aaad3b38a5bf6c3444a7a0 by @astankinajulia)
+* readme (63851972b6b4181a0360d629821d56a1f17f974c by @astankinajulia)
+* add nginx (2cba7c74008409daa0e0a1c4ef12baa8072628b2 by @astankinajulia)
 * add alembic migrations (50b6a2099a556bdcbea4b3f373c80d613e45e35c by @astankinajulia)
 * fill readme (4c8b15b7054828f667d9cfbb24a7523ab483b621 by @astankinajulia)
 * gunicorn (c11b922c192ced3be619a05339f2bb22662fb05d by @astankinajulia)
@@ -24,4 +28,8 @@
 * add description (73357603ff13342a146a1349834d0ef249bc16a6 by @astankinajulia)
 * run tests in docker (31e9472420b41ff06239ccb3aa3b00ce8470b7cf by @astankinajulia)
 * add functional tests for user api (4dcfa2bf04cd205c8250fb8728c24651e88962ab by @astankinajulia)
+
+
+## New Contributors
+* @astankinajulia made their first contribution in https://github.com/astankinajulia/auth/pull/2
 
