@@ -54,8 +54,8 @@ class UserServiceDB(BaseUserServiceDB):
     def create_user_from_site(self, email: str, password: str) -> User:
         return self.create_user(email=email, password=password, auth_type=AuthType.site.value)
 
-    def create_user_from_outer(self, email: str, password: str) -> User:
-        return self.create_user(email=email, password=password, auth_type=AuthType.google.value)
+    def create_user_from_outer(self, email: str, password: str, auth_type: AuthType.value) -> User:
+        return self.create_user(email=email, password=password, auth_type=auth_type)
 
     def get_or_create_user(self, email: str, password: str) -> str:
         user = self.get_user_by_email(email=email)
@@ -85,10 +85,10 @@ class UserServiceDB(BaseUserServiceDB):
         db.session.commit()
         return social_account.id
 
-    def get_or_create_user_by_social_id(self, social_id: str, email: str) -> str:
+    def get_or_create_user_by_social_id(self, social_id: str, email: str, auth_type: AuthType.value) -> str:
         social_account = self.get_social_account_by_social_id(social_id)
         if not social_account:
-            user = self.create_user_from_outer(email=email, password=email+social_id)
+            user = self.create_user_from_outer(email=email, password=email+social_id, auth_type=auth_type)
             self.create_social_account(social_id=social_id, user_id=user.id)
         else:
             user = self.get_user_by_id(social_account.user_id)

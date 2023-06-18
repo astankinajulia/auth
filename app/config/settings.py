@@ -13,7 +13,6 @@ class Config(object):
     """ Base configuration. """
     SERVICE_NAME = 'Auth'
 
-    OAUTHLIB_INSECURE_TRANSPORT = '1'
     enable_tracer = os.environ.get('ENABLE_TRACER', 'True') == 'True'
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
