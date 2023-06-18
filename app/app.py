@@ -55,8 +55,9 @@ def create_app():
         create_superuser_command(email, password)
 
     # configure Jaeger tracer
-    configure_tracer()
-    FlaskInstrumentor().instrument_app(app)
+    if Config.enable_tracer:
+        configure_tracer()
+        FlaskInstrumentor().instrument_app(app)
 
     @app.before_request
     def before_request():
