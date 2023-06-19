@@ -12,6 +12,7 @@
 * add app run in docker-compose (ec4c9d4980e672100d5324cca2ec0dfec3ce379a by @astankinajulia)
 
 ## Bug Fixes
+* Update README.md (32a2e6bfcdf7de5b8b44f9ec9454989255e89ca2 by @astankinajulia)
 * Update changelog.yml (0219328e747d1c572988db97f585a14b5b47f2eb by @astankinajulia)
 * fix create superuser command (676409fbc1accca4b2ca165a3036edec32ed6032 by @astankinajulia)
 * fix logging string (8ed84631aa7e30834b97674dfaabeb6a86dff29c by @astankinajulia)
