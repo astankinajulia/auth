@@ -13,7 +13,7 @@ Service for authorisation and authentication
 * Jaeger Tracing
 * Check X-Request-Id in headers
 * Rate limit Token Bucket algorithm
-* Google authorizatio Authorization
+* Google Authorization
 ## Run server
 ___
 #### Add environment variables
@@ -82,6 +82,10 @@ http://127.0.0.1:5000/oauth2/doc
 
 ### Miro docs
 https://miro.com/app/board/uXjVMJU4K6w=/?share_link_id=718260316962
+
+### async-api service
+Service that uses Auth-service
+https://github.com/astankinajulia/async_api
 
 ## Maintainer
 ___
