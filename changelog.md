@@ -13,6 +13,10 @@
 
 ## Bug Fixes
 * Update README.md (32a2e6bfcdf7de5b8b44f9ec9454989255e89ca2 by @astankinajulia)
+* #6-7 base outer_auth class (219b6e564cca466af3c8c9a64e928af5da3d20e1 by @astankinajulia)
+* #4 add on_delete=CASCADE (3784490d7cc90e4caabd5d0ae95856144aaef03c by @astankinajulia)
+* #2 tracer resource and provider (9e29e0ade687e5be441c647a79e87ec68e39b6ee by @astankinajulia)
+* add enable_tracer config in settings (825d90c08a8cbd85b6fd08bb73d0a93d081a0ac2 by @astankinajulia)
 * Update changelog.yml (0219328e747d1c572988db97f585a14b5b47f2eb by @astankinajulia)
 * fix create superuser command (676409fbc1accca4b2ca165a3036edec32ed6032 by @astankinajulia)
 * fix logging string (8ed84631aa7e30834b97674dfaabeb6a86dff29c by @astankinajulia)
