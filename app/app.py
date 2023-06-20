@@ -55,8 +55,9 @@ def create_app():
         create_superuser_command(email, password)
 
     # configure Jaeger tracer
-    configure_tracer()
-    FlaskInstrumentor().instrument_app(app)
+    if Config.enable_tracer:
+        configure_tracer()
+        FlaskInstrumentor().instrument_app(app)
 
     @app.before_request
     def before_request():
@@ -71,11 +72,5 @@ def create_app():
 
 
 if __name__ == '__main__':
-    # When running locally, disable OAuthlib's HTTPs verification.
-    # ACTION ITEM for developers:
-    #     When running in production *do not* leave this option enabled.
-    # import os
-    # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
     app = create_app()
     app.run()

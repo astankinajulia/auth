@@ -56,7 +56,7 @@ class SocialAccount(db.Model):
     __tablename__ = 'social_account'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship(User, backref=db.backref('social_accounts', lazy=True))
 
     social_id = db.Column(db.String(255), nullable=False, unique=True)
@@ -71,10 +71,11 @@ class SocialAccount(db.Model):
 
 class RolesUsers(db.Model):
     __tablename__ = 'roles_users'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
-    role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
     __table_args__ = (UniqueConstraint('user_id', 'role_id', name='_user_role_uc'),)
+
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id', ondelete='CASCADE'))
 
     def __init__(self, user_id, role_id):
         self.user_id = user_id
@@ -124,7 +125,7 @@ class UserSession(db.Model):
         }
     )
     id = db.Column(db.Integer(), autoincrement=True)
-    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id'))
+    user_id = db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('user.id', ondelete='CASCADE'))
     user_agent = db.Column(db.String(255))
     auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     logout_date = db.Column(db.DateTime(timezone=True))
