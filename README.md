@@ -10,10 +10,12 @@ Service for authorisation and authentication
 * Roles API: Create, update, delete roles, get all roles
 * User Roles API: add, delete role for user, get all user roles 
 * Create superuser console command
-* Jaeger Tracing
 * Check X-Request-Id in headers
-* Rate limit Token Bucket algorithm
 * Google Authorization
+## Tech Features
+* Rate limit Token Bucket algorithm
+* Jaeger Tracing
+* Send errors to Sentry
 ## Run server
 ___
 #### Add environment variables
@@ -99,3 +101,4 @@ ___
 - Redis
 - Docker
 - Gunicorn, gevent
+- Sentry
