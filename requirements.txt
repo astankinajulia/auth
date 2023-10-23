@@ -24,6 +24,7 @@ pydantic==1.10.7
 pyOpenSSL==23.1.1
 python-dotenv==1.0.0
 pytz==2023.3
+sentry-sdk[flask]==1.32.0
 SQLAlchemy==2.0.9
 sqlalchemy-utils==0.41.1
 redis==4.5.4

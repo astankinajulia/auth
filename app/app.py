@@ -1,8 +1,11 @@
 import logging
 
 import click
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 from comands import create_superuser_command
-from config.settings import Config
+from config.settings import Config, DevConfig
 from db.db_models import get_user
 from flask import Flask, request
 from flask_http_middleware import MiddlewareManager
@@ -19,8 +22,20 @@ from tracer_configurator import configure_tracer
 log = logging.getLogger(__name__)
 
 
+def sentry_init():
+    sentry_sdk.init(
+        dsn=Config.SENTRY_DSN,
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
+
+
 def create_app():
     log.info('Create app...')
+
+    sentry_init()
+
     app = Flask(__name__)
     app.config.from_object(Config)
 

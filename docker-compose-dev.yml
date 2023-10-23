@@ -19,9 +19,9 @@ services:
     image: redis:alpine
     restart: always
     ports:
-      - "6379:6379"
+      - "6381:6381"
     expose:
-      - "6379"
+      - "6381"
     volumes:
       - cache:/data
 

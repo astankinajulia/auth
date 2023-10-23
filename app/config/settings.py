@@ -22,7 +22,7 @@ class Config(object):
 
     CLIENT_SECRETS_FILE = os.path.abspath(os.path.join(APP_DIR, 'client_secret.json'))
 
-    SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost')
+    SERVER_NAME = os.environ.get('SERVER_NAME', '0.0.0.0')
 
     DB_TYPE = os.environ.get('DB_TYPE', 'postgresql')
     DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
@@ -36,6 +36,8 @@ class Config(object):
 
     JAEGER_HOST = os.environ.get('JAEGER_HOST', 'localhost')
     JAEGER_PORT = int(os.environ.get('JAEGER_PORT', '6831'))
+
+    SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
 
     SQLALCHEMY_DATABASE_URI = f'{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 

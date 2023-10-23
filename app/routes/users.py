@@ -95,6 +95,15 @@ def get_param(params: dict, param_name: str):
     return param
 
 
+@api.route('/bad')
+class Bad(Resource):
+    @api.doc(parser=parser)
+    def get(self):
+        log.info('Check send error to Sentry')
+        1/0
+        return Response('', status=201, mimetype='application/json')
+
+
 @api.route('/register')
 class Register(Resource):
     @api.doc(parser=parser, responses={201: ''})
