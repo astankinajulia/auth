@@ -1,0 +1,30 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/*
+  json:
+    keys_under_root: true
+    add_error_key: true
+  tags: ["nginx"]
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      labels:
+        type: auth
+      templates:
+      - condition:
+          contains:
+            docker.container.container-name: auth-app
+        config:
+          - type: container
+            paths:
+              - /var/lib/docker/containers/${data.docker.container.id}/*.log
+            exclude_lines: ["^\\s+[\\-`('.|_]"]
+      tags: ["auth"]
+
+output.logstash:
+  enabled: true
+  hosts: ["logstash:5045"]

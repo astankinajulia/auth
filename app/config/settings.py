@@ -70,7 +70,3 @@ class TestConfig(Config):
     TESTING = True
     DEBUG = True
 
-
-# Set logging settings
-logging.config.dictConfig(logger.LOGGING_SETTINGS)
-logging.getLogger().setLevel(Config().logging_level)

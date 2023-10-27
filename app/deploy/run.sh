@@ -3,4 +3,4 @@ set -ex
 
 alembic upgrade head
 
-gunicorn wsgi_app:app -w 4 -b 0.0.0.0:5000
+gunicorn wsgi_app:app -w 4 --log-config config/gunicorn_logging.conf  -b 0.0.0.0:5000

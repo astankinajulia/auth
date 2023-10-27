@@ -14,6 +14,7 @@ FROM base as dev
 
 RUN mkdir "opt/app"
 ENV PYTHONPATH /opt/app:/opt
+ENV OAUTHLIB_INSECURE_TRANSPORT 1
 
 COPY app /opt/app
 COPY tests /opt/app/tests
