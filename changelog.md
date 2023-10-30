@@ -1,4 +1,6 @@
 ## New Features
+* add logging (f94e4ac898c31733fd3cbb3bafc3d29873248fd8 by @astankinajulia)
+* add new logging (80234d231ff13677dcbee35fa222bba98120f2b8 by @astankinajulia)
 * add sentry integration (f7e08f65842f22906d0bf1a1296a71a886d669f8 by @astankinajulia)
 * add partition user_session (7ce3e2f53a20a76d678fad4ffb74c4c9ad4902ac by @astankinajulia)
 * add google oauth (d1b133303ff91e9f22aaad3b38a5bf6c3444a7a0 by @astankinajulia)
