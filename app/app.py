@@ -1,11 +1,15 @@
 import logging
+import logging.config
+import warnings
 
 import click
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from comands import create_superuser_command
+from config.logger import RequestIdFilter
 from config.settings import Config, DevConfig
+from config import logger
 from db.db_models import get_user
 from flask import Flask, request
 from flask_http_middleware import MiddlewareManager
@@ -19,8 +23,6 @@ from routes.user_roles import user_roles_bp
 from routes.users import user_bp
 from tracer_configurator import configure_tracer
 
-log = logging.getLogger(__name__)
-
 
 def sentry_init():
     sentry_sdk.init(
@@ -31,13 +33,25 @@ def sentry_init():
     )
 
 
-def create_app():
-    log.info('Create app...')
+def set_logging(app):
+    warnings.simplefilter("ignore", UserWarning)
 
+    # Set logging settings
+    logging.config.dictConfig(logger.LOGGING_SETTINGS)
+    app.logger = logging.getLogger(__name__)
+    app.logger.setLevel(Config().logging_level)
+    app.logger.addFilter(RequestIdFilter())
+
+
+def create_app():
     sentry_init()
 
     app = Flask(__name__)
+
     app.config.from_object(Config)
+    # app.config.from_object(DevConfig)
+
+    set_logging(app)
 
     from db.db import db
 

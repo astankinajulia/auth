@@ -2,6 +2,7 @@ version: "3.7"
 services:
 
   postgres:
+    container_name: auth-postgres
     image: postgres:14.7
     env_file:
       - app/config/.env
@@ -16,6 +17,7 @@ services:
       - my_network
 
   redis:
+    container_name: auth-redis
     image: redis:alpine
     restart: always
     volumes:
@@ -25,6 +27,7 @@ services:
 
   app:
     restart: unless-stopped
+    container_name: auth-app
     image: app_image
     build:
       context: .
@@ -37,12 +40,14 @@ services:
       - my_network
 
   nginx:
+    container_name: auth-nginx
     restart: unless-stopped
     build:
       context: ./nginx
       dockerfile: Dockerfile
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /tmp/logs/nginx/:/var/log/nginx/
     ports:
       - "80:80"
       - "443:443"
@@ -58,12 +63,28 @@ services:
       - my_network
 
   jaeger:
+    container_name: auth-jaeger
     image: jaegertracing/all-in-one:latest
     ports:
       - "6831:6831/udp"
       - "16686:16686"
     networks:
       - my_network
+
+  filebeat:
+    container_name: auth-filebeat
+    image: docker.elastic.co/beats/filebeat:7.17.14
+    volumes:
+      - /tmp/logs/nginx:/var/log/nginx:ro
+      - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - app
+      - nginx
+    networks:
+      - my_network
+    user: root
 
 volumes:
   cache:
