@@ -11,10 +11,12 @@ from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
 from flask import request
 from google_auth.google_auth import API_SERVICE_NAME, API_VERSION, SCOPES
-from routes.outer_auth_service.base_auth_service import (CALLBACK_URL,
-                                                         ENTRYPOINT_URL,
-                                                         BaseOuterAuth,
-                                                         UserInfo)
+from routes.outer_auth_service.base_auth_service import (
+    CALLBACK_URL,
+    ENTRYPOINT_URL,
+    BaseOuterAuth,
+    UserInfo,
+)
 
 log = logging.getLogger(__name__)
 
@@ -30,12 +32,14 @@ class GoogleAuth(BaseOuterAuth):
 
     def _flow(self, state):
         self.flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            Config.CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+            Config.CLIENT_SECRETS_FILE, scopes=SCOPES, state=state
+        )
         self.flow.redirect_uri = self.callback_url
 
     def authorize(self):
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            Config.CLIENT_SECRETS_FILE, scopes=SCOPES)
+            Config.CLIENT_SECRETS_FILE, scopes=SCOPES
+        )
         flow.redirect_uri = self.callback_url
         authorization_url, state = flow.authorization_url(access_type='offline', )
         # Store the state so the callback can verify the auth server response.
@@ -55,11 +59,14 @@ class GoogleAuth(BaseOuterAuth):
             return 'You need to authorize before revoking credentials.'
 
         credentials = google.oauth2.credentials.Credentials(
-            **flask.session['credentials'])
+            **flask.session['credentials']
+        )
 
-        revoke = requests.post('https://oauth2.googleapis.com/revoke',
-                               params={'token': credentials.token},
-                               headers={'content-type': 'application/x-www-form-urlencoded'})
+        revoke = requests.post(
+            'https://oauth2.googleapis.com/revoke',
+            params={'token': credentials.token},
+            headers={'content-type': 'application/x-www-form-urlencoded'}
+        )
 
         status_code = getattr(revoke, 'status_code')
         if status_code == 200:
@@ -75,11 +82,13 @@ class GoogleAuth(BaseOuterAuth):
 
     def get_credentials(self):
         self.credentials = google.oauth2.credentials.Credentials(
-            **flask.session['credentials'])
+            **flask.session['credentials']
+        )
 
     def get_user_info(self) -> UserInfo:
         user_info_service = googleapiclient.discovery.build(
-            API_SERVICE_NAME, API_VERSION, credentials=self.credentials)
+            API_SERVICE_NAME, API_VERSION, credentials=self.credentials
+        )
         user_info = user_info_service.userinfo().get().execute()
         log.info(user_info['email'])
         return UserInfo(
@@ -91,5 +100,6 @@ class GoogleAuth(BaseOuterAuth):
         self.user_id = user_service_db.get_or_create_user_by_social_id(
             email=user_info.email,
             social_id=user_info.id,
-            auth_type=AuthType.google.value)
+            auth_type=AuthType.google.value
+        )
         user_session_service_db.create_user_session(user_id=self.user_id, user_agent=str(request.user_agent))

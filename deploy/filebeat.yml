@@ -2,7 +2,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /var/log/nginx/*
+    - /var/log/nginx/access-log.json
   json:
     keys_under_root: true
     add_error_key: true
@@ -11,20 +11,22 @@ filebeat.inputs:
 filebeat.autodiscover:
   providers:
     - type: docker
-      hints.enabled: true
-      labels:
-        type: auth
       templates:
       - condition:
           contains:
-            docker.container.container-name: auth-app
+            docker.container.image: "app_image"
         config:
           - type: container
             paths:
               - /var/lib/docker/containers/${data.docker.container.id}/*.log
-            exclude_lines: ["^\\s+[\\-`('.|_]"]
-      tags: ["auth"]
+            tags: ["auth"]
 
 output.logstash:
   enabled: true
   hosts: ["logstash:5045"]
+
+
+processors:
+  - drop_fields:
+      fields: [ "agent", "container", "ecs", "log", "input", "docker", "host" ]
+      ignore_missing: true

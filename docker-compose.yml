@@ -61,11 +61,6 @@ services:
       - redis
     networks:
       - my_network
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://127.0.0.1:5044
-        tag: nginx
 
   jaeger:
     container_name: auth-jaeger
@@ -78,7 +73,7 @@ services:
 
   filebeat:
     container_name: auth-filebeat
-    image: docker.elastic.co/beats/filebeat:7.3.2
+    image: docker.elastic.co/beats/filebeat:7.17.14
     volumes:
       - /tmp/logs/nginx:/var/log/nginx:ro
       - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml

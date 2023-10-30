@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from flask import request
+from flask import has_request_context, request
 from pythonjsonlogger import jsonlogger
 
 
@@ -19,12 +19,25 @@ class JsonLoggerFormatter(jsonlogger.JsonFormatter):
         if message.find('\\u') > 0:
             message = message.encode('utf_8').decode('unicode_escape')
 
+        if has_request_context():
+            record.url = request.url
+            record.remote_addr = request.remote_addr
+            record.method = request.method
+        else:
+            record.url = None
+            record.remote_addr = None
+            record.method = None
+
         json_message = {
             '@timestamp': f'{datetime.utcnow().isoformat()}Z',
             'logger': record.name,
             'level': record.levelname,
+            'url': record.url,
+            'remote_addr': record.remote_addr,
             'data': {
                 'message': message,
+                'x-request-id': getattr(record, 'request_id', None),
+                'method': record.method,
             }
         }
 
@@ -40,6 +53,8 @@ class JsonLoggerFormatter(jsonlogger.JsonFormatter):
 
 LOGGING_SETTINGS = {
     'version': 1,
+    'disable_existing_loggers': True,
+
     'filters': {
         'request_id': {
             '()': RequestIdFilter,
@@ -53,21 +68,20 @@ LOGGING_SETTINGS = {
         'wsgi': {
             'class': 'logging.StreamHandler',
             'stream': 'ext://flask.logging.wsgi_errors_stream',
+            'filters': ['request_id'],
             'formatter': 'default',
         },
         'werkzeug': {
             'class': 'logging.StreamHandler',
-            # 'stream': 'ext://flask.logging.wsgi_errors_stream',
             'formatter': 'default'
         },
         'gunicorn': {
             'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
+            'formatter': 'default',
+            'stream': 'ext://sys.stdout'
         },
     },
     'root': {
-        # 'level': 'INFO',
         'handlers': ['wsgi', 'werkzeug', 'gunicorn'],
     },
 }

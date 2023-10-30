@@ -1,11 +1,13 @@
 import logging
 import logging.config
+import warnings
 
 import click
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from comands import create_superuser_command
+from config.logger import RequestIdFilter
 from config.settings import Config, DevConfig
 from config import logger
 from db.db_models import get_user
@@ -32,13 +34,13 @@ def sentry_init():
 
 
 def set_logging(app):
+    warnings.simplefilter("ignore", UserWarning)
+
     # Set logging settings
     logging.config.dictConfig(logger.LOGGING_SETTINGS)
-    logging.getLogger().setLevel(Config().logging_level)
-
     app.logger = logging.getLogger(__name__)
-    # app.logger.setLevel(logging.INFO)
-    # app.logger.addFilter(RequestIdFilter())
+    app.logger.setLevel(Config().logging_level)
+    app.logger.addFilter(RequestIdFilter())
 
 
 def create_app():
@@ -46,8 +48,8 @@ def create_app():
 
     app = Flask(__name__)
 
-    # app.config.from_object(Config)
-    app.config.from_object(DevConfig)
+    app.config.from_object(Config)
+    # app.config.from_object(DevConfig)
 
     set_logging(app)
 
@@ -86,11 +88,11 @@ def create_app():
         configure_tracer()
         FlaskInstrumentor().instrument_app(app)
 
-    # @app.before_request
-    # def before_request():
-    #     request_id = request.headers.get('X-Request-Id')
-    #     if not request_id:
-    #         raise RuntimeError('request id is required')
+    @app.before_request
+    def before_request():
+        request_id = request.headers.get('X-Request-Id')
+        if not request_id:
+            raise RuntimeError('request id is required')
 
     app.wsgi_app = MiddlewareManager(app)
     app.wsgi_app.add_middleware(RateLimitMiddleware)

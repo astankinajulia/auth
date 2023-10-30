@@ -1,15 +1,15 @@
-import logging
-
 from db.base_cache_service import AbstractCacheService
 from db.errors import NotFoundInDBError
 from db.redis_service import RedisCache
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
-from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt_identity, jwt_required,
-                                set_access_cookies, set_refresh_cookies,
-                                unset_jwt_cookies, verify_jwt_in_request)
+from flask import Blueprint, current_app, Response, jsonify, request
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token,
+    get_jwt_identity, jwt_required,
+    set_access_cookies, set_refresh_cookies,
+    unset_jwt_cookies, verify_jwt_in_request,
+)
 from flask_login import login_user
 from flask_restx import Api, Resource, fields
 from flask_restx.reqparse import RequestParser
@@ -17,8 +17,6 @@ from jwt_service import prepare_response_with_tokens
 from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from routes.schemas import PaginatedUserSessions
 from routes.utils import validate_email
-
-log = logging.getLogger(__name__)
 
 cache_service: AbstractCacheService = RedisCache()
 
@@ -35,7 +33,6 @@ api = Api(
 parser = api.parser()
 parser.add_argument('email', type=str, required=True, location='json')
 parser.add_argument('password', type=str, required=True, location='json')
-
 
 pagination_parser = RequestParser()
 pagination_parser.add_argument(
@@ -85,6 +82,7 @@ def unauthorized_api_usage(e):
 
 def validate_email_param(email: str):
     if not validate_email(email):
+        current_app.logger.warning(f'Not valid email {email}')
         raise BadRequestError(message=f'Not valid email {email}')
 
 
@@ -99,8 +97,8 @@ def get_param(params: dict, param_name: str):
 class Bad(Resource):
     @api.doc(parser=parser)
     def get(self):
-        log.info('Check send error to Sentry')
-        1/0
+        current_app.logger.info('API for sending error to Sentry')
+        1 / 0
         return Response('', status=201, mimetype='application/json')
 
 
@@ -109,7 +107,7 @@ class Register(Resource):
     @api.doc(parser=parser, responses={201: ''})
     def post(self):
         """Register user with email and password."""
-        log.info('Register api')
+        current_app.logger.info('Register api')
 
         params = request.get_json()
         email = get_param(params, 'email')
@@ -117,8 +115,11 @@ class Register(Resource):
 
         validate_email_param(email)
 
+        current_app.logger.info(f'Register user with email {email}')
+
         user = user_service_db.get_user_by_email(email)
         if user:
+            current_app.logger.warning(f'User with email {email} has already registered')
             raise BadRequestError(message='User has already registered')
 
         user_service_db.create_user(email=email, password=password)
@@ -130,7 +131,7 @@ class Login(Resource):
     @api.doc(parser=parser)
     def post(self):
         """Login user."""
-        log.info('Login api')
+        current_app.logger.info('Login api')
 
         params = request.get_json()
         email = get_param(params, 'email')
@@ -139,12 +140,16 @@ class Login(Resource):
         try:
             user = user_service_db.get_user_by_email(email=email, is_optional=False)
         except NotFoundInDBError:
+            current_app.logger.warning(f'User with email {email} not found')
             raise NotFoundError(message='User not found')
         if not user.verify_password(password):
+            current_app.logger.warning(f'Bad email {email} or password')
             api.abort(401, 'Bad username or password')
 
+        current_app.logger.info(f'Login user with email {email}')
         login_user(user)
 
+        current_app.logger.info(f'Create user session for user_id={user.id}')
         user_session_service_db.create_user_session(user_id=user.id, user_agent=str(request.user_agent))
 
         response = prepare_response_with_tokens(user_id=user.id)
@@ -157,15 +162,17 @@ class Refresh(Resource):
     @jwt_required(refresh=True)
     def post(self):
         """Update refresh token."""
-        log.info('Refresh api')
+        current_app.logger.info('Refresh api')
 
         identity = get_jwt_identity()
 
         refresh_token_in_db = cache_service.get_from_cache(key=identity)
         if not refresh_token_in_db:
+            current_app.logger.warning('Not found refresh token in db')
             raise UnauthorizedError(message='Not found refresh token in db')
         refresh_token_cookie = request.cookies['refresh_token_cookie']
         if refresh_token_in_db != refresh_token_cookie:
+            current_app.logger.warning('Not correct refresh token in db')
             raise UnauthorizedError(message='Not correct refresh token in db')
 
         access_token = create_access_token(identity=identity, fresh=False)
@@ -185,7 +192,7 @@ class Logout(Resource):
     @jwt_required(refresh=True)
     def post(self):
         """Logout user."""
-        log.info('Logout api')
+        current_app.logger.info('Logout api')
 
         identity = get_jwt_identity()
 
@@ -204,10 +211,11 @@ class Update(Resource):
     @jwt_required()
     def post(self):
         """Update user."""
-        log.info('Update user api')
+        current_app.logger.info('Update user api')
 
         jwt_data = verify_jwt_in_request()
         if not jwt_data:
+            current_app.logger.warning('Request without email')
             raise BadRequestError(message='Request without email')
 
         params = request.get_json()
@@ -215,16 +223,19 @@ class Update(Resource):
         password = get_param(params, 'password')
         validate_email_param(email)
 
+        current_app.logger.info(f'Update email or password for user with email {email}')
+
         user_id = get_jwt_identity()
         try:
             user_service_db.get_user_by_id(user_id=user_id, is_optional=False)
         except NotFoundInDBError:
-            log.info('User %s not found', user_id)
+            current_app.logger.warning('User %s not found', user_id)
             raise NotFoundError(message='User not found')
 
         user_service_db.update_user(user_id, email, password)
 
-        response = jsonify({'message': 'User updated'})
+        current_app.logger.info(f'User {user_id} is updated')
+        response = jsonify({'message': 'User is updated'})
 
         access_token_cookie = request.cookies.get('access_token_cookie')
         refresh_token_cookie = request.cookies.get('refresh_token_cookie')
@@ -243,6 +254,7 @@ class GetSessions(Resource):
     def get(self):
         """Get user sessions."""
         user_id = get_jwt_identity()
+        current_app.logger.info(f'Get user {user_id} sessions API')
 
         p_args = pagination_parser.parse_args()
         page = p_args.get('page')

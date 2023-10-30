@@ -1,12 +1,14 @@
 import logging
 
 import click
+
 from db.errors import AlreadyExistsDBError
 from db.roles_service import role_service_db
 from db.user_roles_service import user_role_service_db
 from db.user_service import user_service_db
 
 log = logging.getLogger(__name__)
+
 log.info('Create command create_superuser')
 
 
