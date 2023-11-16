@@ -1,4 +1,5 @@
 ## New Features
+* add confirm email (9d5045e8e1269ebe5c7ee28dcf03fca89b6193eb by @astankinajulia)
 * add logging (f94e4ac898c31733fd3cbb3bafc3d29873248fd8 by @astankinajulia)
 * add new logging (80234d231ff13677dcbee35fa222bba98120f2b8 by @astankinajulia)
 * add sentry integration (f7e08f65842f22906d0bf1a1296a71a886d669f8 by @astankinajulia)
