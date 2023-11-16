@@ -51,6 +51,17 @@ class Config(object):
     logging_level = os.environ.get('logging_level', 'INFO')
     secret_key = os.environ.get('secret_key', 'bbb-test')
 
+    CONFIRM_EMAIL_EXPIRATION_DAYS = 5
+    BASE_CONFIRM_EMAIL_URL = 'https://0.0.0.0/confirm_email'
+    BASE_CONFIRM_EMAIL_TINY_URL = 'https://0.0.0.0/tiny'
+    MAIN_PAGE_REDIRECT_URL = 'https://main-page/'
+
+    CHARACTERS = '23456789qwertyuipasdfghkzxcvbnmQWERTYUPASDFGHJKLZXCVBNM'
+    TOKEN_LENGTH = 10
+
+    NOTIFICATIONS_API_URL = 'http://host.docker.internal:8000'
+    NOTIFICATIONS_API_ENDPOINT = '/api/v1/user_registered'
+
 
 class ProdConfig(Config):
     """ Production configuration. """
