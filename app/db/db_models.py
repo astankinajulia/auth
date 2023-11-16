@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import enum
+import random
 import uuid
 
+from config.settings import Config
 from db.db import db
 from flask_login import UserMixin
 from flask_security import RoleMixin
@@ -27,6 +29,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     email = db.Column(db.String(255), unique=False)
+    email_is_confirmed = db.Column(db.Boolean, nullable=False, default=False)
     username = db.Column(db.String(255), nullable=True)
     password = db.Column(db.String(255), nullable=False)
     roles = db.relationship('Role', secondary='roles_users', backref=db.backref('users', lazy='dynamic'))
@@ -129,3 +132,27 @@ class UserSession(db.Model):
     user_agent = db.Column(db.String(255))
     auth_date = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     logout_date = db.Column(db.DateTime(timezone=True))
+
+
+def get_short() -> str:
+    return ''.join(
+        random.choices(
+            Config.CHARACTERS,
+            k=Config.TOKEN_LENGTH,
+        )
+    )
+
+
+class TinyUrl(db.Model):
+    __tablename__ = 'tiny_urls'
+    full_url = db.Column(db.String(255), unique=True, nullable=False)
+    short_url = db.Column(db.String(10), unique=True, nullable=False, primary_key=True)
+    requests_count = db.Column(db.Integer, default=0)
+    created_date = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    def __init__(self, full_url):
+        self.full_url = full_url
+        while True:
+            self.short_url = get_short()
+            if not TinyUrl.query.filter_by(short_url=self.short_url).first():
+                break

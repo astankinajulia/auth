@@ -12,6 +12,8 @@ Service for authorisation and authentication
 * Create superuser console command
 * Check X-Request-Id in headers
 * Google Authorization
+* Confirm Email
+* Tiny urls
 ## Tech Features
 * Rate limit Token Bucket algorithm
 * Jaeger Tracing
@@ -81,6 +83,10 @@ http://127.0.0.1:5000/users/doc
 ### OAUTH2 API
 API for google authentication.  
 http://127.0.0.1:5000/oauth2/doc
+
+### CONFIRM EMAIL API
+API for email confirmation.  
+http://127.0.0.1:5000/confirm_email/doc
 
 ### Miro docs
 https://miro.com/app/board/uXjVMJU4K6w=/?share_link_id=718260316962

@@ -51,6 +51,12 @@ class UserServiceDB(BaseUserServiceDB):
         db.session.commit()
         return user
 
+    @trace_func
+    def delete_user(self, user_id: str) -> None:
+        user = self.get_user_by_id(user_id)
+        db.session.delete(user)
+        db.session.commit()
+
     def create_user_from_site(self, email: str, password: str) -> User:
         return self.create_user(email=email, password=password, auth_type=AuthType.site.value)
 
@@ -88,7 +94,7 @@ class UserServiceDB(BaseUserServiceDB):
     def get_or_create_user_by_social_id(self, social_id: str, email: str, auth_type: AuthType.value) -> str:
         social_account = self.get_social_account_by_social_id(social_id)
         if not social_account:
-            user = self.create_user_from_outer(email=email, password=email+social_id, auth_type=auth_type)
+            user = self.create_user_from_outer(email=email, password=email + social_id, auth_type=auth_type)
             self.create_social_account(social_id=social_id, user_id=user.id)
         else:
             user = self.get_user_by_id(social_account.user_id)
@@ -96,6 +102,11 @@ class UserServiceDB(BaseUserServiceDB):
             user.email = email
             db.session.commit()
         return user.id
+
+    def confirm_email(self, user_id: str):
+        user = self.get_user_by_id(user_id=user_id, is_optional=False)
+        user.email_is_confirmed = True
+        db.session.commit()
 
 
 user_service_db = UserServiceDB()

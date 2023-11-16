@@ -17,6 +17,8 @@ from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
 from middlewares.rate_limiter import RateLimitMiddleware
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
+
+from routes.confirm_email import confirm_email_bp
 from routes.oauth2 import oauth2_bp
 from routes.roles import roles_bp
 from routes.user_roles import user_roles_bp
@@ -73,6 +75,7 @@ def create_app():
     app.register_blueprint(roles_bp, url_prefix='/roles')
     app.register_blueprint(user_roles_bp, url_prefix='/users')
     app.register_blueprint(oauth2_bp, url_prefix='/oauth2')
+    app.register_blueprint(confirm_email_bp, url_prefix='')
 
     JWTManager(app)
 

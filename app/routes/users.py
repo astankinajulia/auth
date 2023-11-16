@@ -1,6 +1,9 @@
+from config.settings import Config
 from db.base_cache_service import AbstractCacheService
+from db.db import db
 from db.errors import NotFoundInDBError
 from db.redis_service import RedisCache
+from db.tiny_url_service import create_tiny_url_confirm_email, delete_url
 from db.user_service import user_service_db
 from db.user_session_service import user_session_service_db
 from flask import Blueprint, current_app, Response, jsonify, request
@@ -14,6 +17,7 @@ from flask_login import login_user
 from flask_restx import Api, Resource, fields
 from flask_restx.reqparse import RequestParser
 from jwt_service import prepare_response_with_tokens
+from notifications_api import send_user_registered_notify
 from routes.errors import BadRequestError, NotFoundError, UnauthorizedError
 from routes.schemas import PaginatedUserSessions
 from routes.utils import validate_email
@@ -120,10 +124,27 @@ class Register(Resource):
         user = user_service_db.get_user_by_email(email)
         if user:
             current_app.logger.warning(f'User with email {email} has already registered')
-            raise BadRequestError(message='User has already registered')
+            api.abort(400, 'User has already registered')
 
-        user_service_db.create_user(email=email, password=password)
-        return Response('', status=201, mimetype='application/json')
+        tiny_url = None
+        try:
+            user = user_service_db.create_user(email=email, password=password)
+            tiny_url = create_tiny_url_confirm_email(user_id=user.id)
+            if send_user_registered_notify(
+                email=email,
+                user_id=user.id,
+                tiny_url=f'{Config.BASE_CONFIRM_EMAIL_TINY_URL}/{tiny_url}'
+            ):
+                db.session.commit()
+                return Response('', status=201, mimetype='application/json')
+
+        except Exception as e:
+            current_app.logger.error(e)
+
+        user_service_db.delete_user(user_id=user.id)
+        if tiny_url:
+            delete_url(tiny_url)
+        api.abort(400, 'Cannot register user, cannot send register message')
 
 
 @api.route('/login', methods=['POST'])
