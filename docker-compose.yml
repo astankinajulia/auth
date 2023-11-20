@@ -38,6 +38,7 @@ services:
       - redis
     networks:
       - my_network
+      - backend
 
   nginx:
     container_name: auth-nginx
@@ -93,3 +94,5 @@ volumes:
 networks:
   my_network:
     driver: bridge
+  backend:
+    external: true

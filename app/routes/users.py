@@ -178,6 +178,26 @@ class Login(Resource):
         return response
 
 
+@api.route('/user/<user_id>', methods=['GET'])
+class GetUser(Resource):
+    @api.doc(parser=parser)
+    def get(self, user_id):
+        """Get user."""
+        current_app.logger.info('Login api')
+
+        try:
+            user = user_service_db.get_user_by_id(user_id=user_id, is_optional=False)
+        except NotFoundInDBError:
+            current_app.logger.warning(f'User {user_id} not found')
+            raise NotFoundError(message='User not found')
+
+        return {
+            'user_id': user.id,
+            'email': user.email,
+            'username': user.username,
+        }
+
+
 @api.route('/refresh')
 class Refresh(Resource):
     @jwt_required(refresh=True)
