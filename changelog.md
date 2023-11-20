@@ -1,4 +1,5 @@
 ## New Features
+* add get user api (1c8a27352e90faf9b182c6da5db49755cf139858 by @astankinajulia)
 * add confirm email (9d5045e8e1269ebe5c7ee28dcf03fca89b6193eb by @astankinajulia)
 * add logging (f94e4ac898c31733fd3cbb3bafc3d29873248fd8 by @astankinajulia)
 * add new logging (80234d231ff13677dcbee35fa222bba98120f2b8 by @astankinajulia)
